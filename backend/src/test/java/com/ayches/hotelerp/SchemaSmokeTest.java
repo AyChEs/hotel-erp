@@ -25,8 +25,9 @@ class SchemaSmokeTest extends AbstractIntegrationTest {
 
     @Test
     void seedDataIsLoaded() {
-        assertThat(hotels.count()).isEqualTo(3);
-        assertThat(rooms.count()).isEqualTo(10);
+        // >= because the container is shared across test classes and others add rows
+        assertThat(hotels.count()).isGreaterThanOrEqualTo(3);
+        assertThat(rooms.count()).isGreaterThanOrEqualTo(10);
         assertThat(users.findByEmail("admin@hotel-erp.dev")).isPresent();
         assertThat(bookings.existsByCode("BK-2026-000001")).isTrue();
     }

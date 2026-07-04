@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    # Neon: use the POOLED connection string. Example:
+    # jdbc:postgresql://<endpoint>-pooler.<region>.aws.neon.tech/hotelerp?sslmode=require
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 0
+      connection-timeout: 30000
+      initialization-fail-timeout: 60000
+      idle-timeout: 60000
+      max-lifetime: 300000
+  flyway:
+    locations: classpath:db/migration
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  mail:
+    enabled: true
+
+logging:
+  level:
+    com.ayches.hotelerp: INFO

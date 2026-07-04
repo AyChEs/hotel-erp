@@ -1,0 +1,17 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    locations: classpath:db/migration,classpath:db/dev
+
+app:
+  jwt:
+    secret: dGVzdC1zZWNyZXQtb25seS1mb3ItaW50ZWdyYXRpb24tdGVzdHMtMDEyMzQ1Ng==
+    access-token-ttl: PT15M
+    refresh-token-ttl: P7D
+    issuer: hotel-erp-test
+  cors:
+    allowed-origins: http://localhost:5173
+  mail:
+    enabled: false

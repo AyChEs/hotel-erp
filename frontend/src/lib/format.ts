@@ -11,10 +11,15 @@ export const dateTime = (iso: string) => dateTimeFmt.format(new Date(iso))
 export const nights = (checkIn: string, checkOut: string) =>
   Math.round((Date.parse(checkOut) - Date.parse(checkIn)) / 86_400_000)
 
-export const todayIso = () => new Date().toISOString().slice(0, 10)
+// Build the ISO date from local components: toISOString() is UTC and would
+// report yesterday for local times before the UTC offset (e.g. 00:30 in Madrid).
+const localIso = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+export const todayIso = () => localIso(new Date())
 
 export const plusDaysIso = (days: number, from = new Date()) => {
   const d = new Date(from)
   d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
+  return localIso(d)
 }

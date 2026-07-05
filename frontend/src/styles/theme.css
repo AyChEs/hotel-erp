@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+
+/*
+ * Zellige Hotels ERP — visual system (see /DESIGN.md, /PRODUCT.md)
+ * Deep teal + gold on a teal-tinted near-white ("glaze").
+ * The arabesque pattern lives on shell surfaces only, never behind data.
+ */
+@theme {
+  /* Neutrals tinted toward the brand teal (hue ~200), never warm cream */
+  --color-glaze-50: #f4f8f8;
+  --color-glaze-100: #e9f0f0;
+  --color-glaze-200: #d5e2e2;
+
+  --color-teal-950: #06282b;
+  --color-teal-900: #0a3a3f;
+  --color-teal-800: #10494f;
+  --color-teal-700: #175d64;
+  --color-teal-600: #1f747d;
+  --color-teal-500: #2b8d97;
+  --color-teal-100: #d3e8ea;
+  --color-teal-50: #ecf5f6;
+
+  --color-gold-600: #a97e2f;
+  --color-gold-500: #c19540;
+  --color-gold-400: #d4ae5e;
+  --color-gold-300: #e3c688;
+  --color-gold-100: #f3e8cf;
+
+  --color-terra-600: #a4552f; /* destructive / error only */
+  --color-terra-100: #f2ddd2;
+
+  /* Display serif is for brand surfaces (hero, auth titles) only — never UI chrome */
+  --font-display: 'Marcellus', ui-serif, Georgia, serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --radius-tile: 0.375rem;
+}
+
+/* ---------- base ---------- */
+html {
+  @apply bg-glaze-50 text-teal-950 antialiased;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ---------- arabesque shell surfaces ---------- */
+
+/* Eight-point star tessellation, inline SVG so it costs no request. */
+.bg-arabesque {
+  background-color: var(--color-teal-950);
+  background-image: url("data:image/svg+xml,%3Csvg width='96' height='96' viewBox='0 0 96 96' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23c19540' stroke-opacity='0.16' stroke-width='1'%3E%3Cpath d='M48 8 L58 38 L88 48 L58 58 L48 88 L38 58 L8 48 L38 38 Z'/%3E%3Cpath d='M48 20 L55 41 L76 48 L55 55 L48 76 L41 55 L20 48 L41 41 Z'/%3E%3Ccircle cx='48' cy='48' r='6'/%3E%3Cpath d='M0 0 L16 0 L0 16 Z M96 0 L96 16 L80 0 Z M0 96 L0 80 L16 96 Z M96 96 L80 96 L96 80 Z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 96px 96px;
+}
+
+.bg-arabesque-light {
+  background-color: var(--color-glaze-50);
+  background-image: url("data:image/svg+xml,%3Csvg width='96' height='96' viewBox='0 0 96 96' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2310494f' stroke-opacity='0.07' stroke-width='1'%3E%3Cpath d='M48 8 L58 38 L88 48 L58 58 L48 88 L38 58 L8 48 L38 38 Z'/%3E%3Cpath d='M48 20 L55 41 L76 48 L55 55 L48 76 L41 55 L20 48 L41 41 Z'/%3E%3Ccircle cx='48' cy='48' r='6'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 96px 96px;
+}
+
+/* Ornamental divider: line — diamond — line (brand surfaces) */
+.divider-arabesque {
+  @apply flex items-center gap-3 text-gold-500;
+}
+.divider-arabesque::before,
+.divider-arabesque::after {
+  content: '';
+  @apply h-px flex-1 bg-gold-300;
+}
+
+/* ---------- surfaces ---------- */
+.card-tile {
+  @apply rounded-(--radius-tile) border border-glaze-200 bg-white shadow-sm;
+}
+/* Gold top keyline: brand moments (auth, hero cards), not data UI */
+.card-tile-accent {
+  @apply rounded-(--radius-tile) border border-glaze-200 bg-white shadow-sm
+    border-t-2 border-t-gold-500;
+}
+
+/* ---------- buttons (state-complete: hover/focus/disabled) ---------- */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-(--radius-tile)
+    bg-teal-800 px-4 py-2 text-sm font-medium text-glaze-50
+    transition-colors duration-150 hover:bg-teal-700
+    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600
+    disabled:cursor-not-allowed disabled:opacity-50;
+}
+.btn-gold {
+  @apply inline-flex items-center justify-center gap-2 rounded-(--radius-tile)
+    bg-gold-500 px-4 py-2 text-sm font-medium text-teal-950
+    transition-colors duration-150 hover:bg-gold-400
+    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-600
+    disabled:cursor-not-allowed disabled:opacity-50;
+}
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-(--radius-tile)
+    border border-teal-800/30 px-4 py-2 text-sm font-medium text-teal-900
+    transition-colors duration-150 hover:bg-teal-50
+    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600
+    disabled:cursor-not-allowed disabled:opacity-50;
+}
+.btn-danger {
+  @apply inline-flex items-center justify-center gap-2 rounded-(--radius-tile)
+    border border-terra-600/40 px-4 py-2 text-sm font-medium text-terra-600
+    transition-colors duration-150 hover:bg-terra-100
+    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terra-600
+    disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+/* ---------- forms ---------- */
+.field-label {
+  @apply mb-1 block text-xs font-semibold tracking-wide text-teal-800 uppercase;
+}
+.field-input {
+  @apply w-full rounded-(--radius-tile) border border-glaze-200 bg-white px-3 py-2
+    text-sm text-teal-950 placeholder:text-teal-800/60
+    transition-colors duration-150
+    focus:border-gold-500 focus:ring-1 focus:ring-gold-400 focus:outline-none
+    disabled:cursor-not-allowed disabled:bg-glaze-100;
+}
+.field-error {
+  @apply mt-1 text-xs text-terra-600;
+}
+
+/* ---------- status ---------- */
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+/* ---------- loading ---------- */
+.skeleton {
+  @apply animate-pulse rounded-(--radius-tile) bg-glaze-200;
+}

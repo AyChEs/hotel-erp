@@ -59,11 +59,16 @@ export default function HotelsPage() {
               to={`/hotels/${hotel.id}`}
               className="card-tile group flex flex-col gap-4 p-5 transition-shadow duration-200 hover:shadow-md sm:flex-row sm:items-center"
             >
-              <div
-                className="bg-arabesque flex h-24 w-full shrink-0 items-end rounded-(--radius-tile) p-3 sm:w-44"
-                aria-hidden
-              >
-                <span className="font-display text-gold-300">
+              <div className="relative h-32 w-full shrink-0 overflow-hidden rounded-(--radius-tile) bg-teal-900 sm:h-24 sm:w-44">
+                {hotel.imageUrl && (
+                  <img
+                    src={hotel.imageUrl}
+                    alt={`Fachada de ${hotel.name}`}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:group-hover:scale-100"
+                  />
+                )}
+                <span className="absolute bottom-0 left-0 bg-teal-950/85 px-2 py-0.5 font-display text-sm text-gold-300">
                   {hotel.category.starRating}★
                 </span>
               </div>

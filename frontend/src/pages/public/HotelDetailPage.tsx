@@ -70,9 +70,18 @@ export default function HotelDetailPage() {
 
   return (
     <div>
-      {/* Hotel header — brand surface */}
-      <section className="bg-arabesque">
-        <div className="mx-auto max-w-6xl px-4 py-12">
+      {/* Hotel header — brand surface with the hotel's own photography */}
+      <section className="relative isolate overflow-hidden bg-teal-950">
+        {hotel?.imageUrl && (
+          <img
+            src={hotel.imageUrl}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 h-full w-full object-cover opacity-40"
+          />
+        )}
+        <div className="bg-arabesque absolute inset-0 opacity-60" aria-hidden />
+        <div className="relative mx-auto max-w-6xl px-4 py-12">
           <p className="text-sm text-gold-300">
             <Link to="/hotels" className="hover:text-gold-200">
               Hoteles
@@ -207,6 +216,14 @@ export default function HotelDetailPage() {
                   key={room.id}
                   className="card-tile flex flex-col gap-4 p-5 sm:flex-row sm:items-center"
                 >
+                  {room.imageUrl && (
+                    <img
+                      src={room.imageUrl}
+                      alt={`Habitación ${room.number}`}
+                      loading="lazy"
+                      className="h-32 w-full shrink-0 rounded-(--radius-tile) object-cover sm:h-24 sm:w-40"
+                    />
+                  )}
                   <div className="min-w-0 flex-1">
                     <h3 className="font-medium text-teal-900">
                       Habitación {room.number} — {ROOM_TYPE_LABEL[room.type]}

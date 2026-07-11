@@ -1,56 +1,55 @@
-# Zellige Hotels · Hotel ERP
+# Hotel ERP
 
-Full-stack hotel management platform: public booking site, client self-service area
-and a complete staff ERP (bookings lifecycle, invoicing, housekeeping, dashboards) —
-built as a portfolio-grade rewrite of a classroom project.
+A hotel management platform I built end-to-end as a learning project:
+public site with browsing and booking, client self-service area, and a
+complete staff ERP (booking lifecycle, invoicing, housekeeping, dashboards).
 
-**Stack:** Spring Boot 3.4 (Java 21) REST API · JWT with rotating refresh tokens ·
-PostgreSQL + Flyway · React 19 + TypeScript + Tailwind CSS 4 · TanStack Query ·
-Recharts · Testcontainers · Docker.
+It's a rewrite of a smaller classroom project — same idea, but rebuilt
+properly, with the engineering I wanted to learn: Spring Boot on the
+backend, React on the front, real auth, real database constraints, tests
+that touch a real Postgres, deployed for the cost of a domain name.
 
 ![Landing](docs/screenshots/landing.png)
 
-| Admin dashboard | Hotel & availability |
+| Admin dashboard | Hotel detail |
 |---|---|
 | ![Dashboard](docs/screenshots/admin-dashboard.png) | ![Detail](docs/screenshots/hotel-detail.png) |
 
-## Features
+## Stack
 
-**Public site**
-- Hotel browsing with search/filters and real-time availability by dates and party size.
-- Direct booking with per-board pricing (room only / B&B / half board / full board).
+Spring Boot 3.4 (Java 21) · PostgreSQL + Flyway · JWT with rotating refresh
+tokens · React 19 + TypeScript + Tailwind 4 · TanStack Query · Recharts ·
+Testcontainers · Docker.
 
-**Client area** — my bookings (with cancellation), my invoices (printable, VAT
-breakdown), profile management.
+## What's in it
 
-**Staff ERP** (role-based: `ADMIN`, `MANAGER`, `RECEPTIONIST`)
-- Booking lifecycle: confirm → check-in → check-out → invoice, with room status
-  sync and automatic turnover-cleaning tasks.
-- Invoicing with sequential numbering (`INV-2026-0001`) and 10% VAT breakdown.
-- Occupancy calendar (rooms × dates), task board, full CRUDs for hotels, rooms,
-  categories, clients and employees.
-- Dashboard: occupancy today, monthly revenue, bookings by status (KPIs + charts).
+**Public site.** Hotel browsing, search by dates and party size, real-time
+availability, direct booking with per-board pricing (room only / B&B / half
+board / full board).
 
-**Security**
-- Stateless JWT (15 min access) + rotating refresh tokens hashed in DB with
-  **reuse detection** (a replayed token revokes the whole session family).
-- BCrypt, strict CORS allowlist, RFC 7807 problem-details on every error.
-- Double-booking protection: service-level overlap check **plus** a PostgreSQL
-  `EXCLUDE USING gist` constraint as a race-proof backstop.
+**Client area.** My bookings (with cancellation), my invoices (printable,
+with VAT breakdown), profile.
+
+**Staff ERP.** Three roles — admin, manager, receptionist. Booking
+lifecycle: confirm → check-in → check-out → invoice, with room status
+synced and a housekeeping task created automatically. Sequential invoice
+numbering (`INV-2026-0001`). Occupancy calendar, task board, full CRUDs
+for everything that isn't a guest. Dashboard with KPIs and charts.
+
+**The part I'm most proud of:** the double-booking protection. The
+service layer rejects overlapping reservations, *and* the database has a
+`EXCLUDE USING gist` constraint as a race-proof backstop. Even if two
+receptionists confirm the same room at the same second, the second one
+loses.
 
 ## Run it locally
 
-Requirements: Java 21, Node 20+, Docker.
+You need Java 21, Node 20+ and Docker.
 
 ```bash
-# 1. Database (PostgreSQL 16) + Mailpit (catches outgoing email at http://localhost:8025)
-docker compose up -d
-
-# 2. Backend — http://localhost:8080  (Swagger UI at /swagger-ui.html)
+docker compose up -d                              # Postgres + Mailpit
 cd backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-
-# 3. Frontend — http://localhost:5173 (proxies /api to the backend)
-cd frontend && npm install && npm run dev
+cd frontend && npm install && npm run dev         # http://localhost:5173
 ```
 
 Demo accounts (seeded):
@@ -65,43 +64,70 @@ Demo accounts (seeded):
 ## Tests
 
 ```bash
-cd backend && ./mvnw verify      # 28 tests: unit + MockMvc + Testcontainers (real PostgreSQL)
-cd frontend && npm test -- --run # Vitest unit tests
+cd backend && ./mvnw verify          # 28 tests, incl. Testcontainers (real Postgres)
+cd frontend && npm test -- --run     # Vitest unit tests
 ```
 
-CI runs both suites on every push (`.github/workflows/ci.yml`).
+CI runs both on every push (`.github/workflows/ci.yml`).
 
 ## Architecture
 
 ```
-backend/  com.ayches.hotelerp     package-by-feature
-├── auth/ security/              JWT issue/refresh/rotation, filters, role rules
-├── hotel/ room/ person/         CRUD features: controller → service → repository + DTO/MapStruct
-├── booking/ invoice/ task/      the ERP core (lifecycle state machine, pricing, numbering)
-├── dashboard/                   KPI + series aggregation (native SQL, generate_series)
-├── notification/                EmailService: no-op (dev/test) / SMTP (Mailpit local, Brevo prod)
-└── resources/db/migration/      Flyway: V1 schema · V2 reference data · V901 images
+backend/  com.ayches.hotelerp        package-by-feature
+├── auth/                            JWT issue/refresh/rotation, filters, role rules
+├── hotel/ room/ person/             CRUD features: controller → service → repository + DTO/mapper
+├── booking/ invoice/ task/          the ERP core (lifecycle state machine, pricing, numbering)
+├── dashboard/                       KPI + series aggregation (native SQL, generate_series)
+├── notification/                    EmailService: no-op (dev/test) / SMTP (Mailpit local, Brevo prod)
+└── resources/db/migration/          Flyway: V1 schema · V2 reference data · V901 images
 
-frontend/ src/
-├── api/                         axios + single-flight token refresh, typed endpoints
-├── auth/                        AuthContext, role-guarded routes
-├── components/ui/               DataTable, Modal, badges, feedback states
-├── pages/{public,account,admin} 16 routes, lazy-loaded
-└── styles/theme.css             design system (see DESIGN.md / PRODUCT.md)
+frontend/  src/
+├── api/                             axios + single-flight token refresh, typed endpoints
+├── auth/                            AuthContext, role-guarded routes
+├── components/ui/                   DataTable, Modal, badges, feedback states
+├── pages/{public,account,admin}     16 routes, lazy-loaded
+└── styles/theme.css                 tokens (see DESIGN.md)
 ```
 
-- **Auth flow:** access token in memory, refresh token rotated on every use;
-  concurrent 401s share one refresh (single-flight) to avoid tripping reuse detection.
-- **Pricing:** `total = (pricePerNight + boardSupplement × guests) × nights`,
-  computed server-side; the invoice back-computes the VAT-inclusive breakdown.
-- **Design system:** zellige/arabesque identity — deep teal + gold on a
-  teal-tinted near-white; the pattern lives on shell surfaces, never behind data.
+Auth flow: access token in memory, refresh token rotated on every use.
+Concurrent 401s share a single refresh (single-flight) so they don't
+trip the reuse-detection logic.
 
-## Deployment (100% free tier)
+## What I learned
 
-See **[DEPLOYMENT.md](DEPLOYMENT.md)** for the step-by-step guide:
-Render (API, Docker) + Neon (PostgreSQL) + Vercel (SPA) + Brevo (SMTP).
+A few things that genuinely surprised me while building this:
+
+- **Refresh-token rotation isn't optional.** My first implementation issued
+  a long-lived refresh token and called it done. Then I read OWASP properly
+  and added rotation with reuse detection: if a token is used twice, the
+  whole family is revoked. Cheap to build, very comforting.
+- **The `EXCLUDE USING gist` constraint is a hammer.** The first time I
+  wrote a "no overlapping bookings" check, it was wrong (off-by-one on the
+  checkout day). The second time it was still wrong (timezone handling).
+  The third time I let the database do it and the test is one line.
+- **TanStack Query changed how I think about frontend state.** I'd been
+  carrying `useEffect` + `useState` + manual cache invalidation for years.
+  This was the first project where I stopped writing that code.
+- **Tailwind 4's CSS-first config is much nicer than v3.** I was
+  sceptical. I was wrong.
+
+## What I'd do differently
+
+- The first version of the booking pricing had board-supplement as a free
+  number per hotel. It should have been a per-room-night add-on. I refactored
+  it but the schema migration is messy.
+- I split the front into too many micro-components early. Some files are
+  three lines that import from seven places. I'd start with bigger components
+  and split only when something actually repeats.
+- I should have written the dashboard charts in a different order — the
+  data layer went in last and the chart components are now tightly coupled
+  to a specific shape.
+
+## Deployment
+
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for the step-by-step (Render + Neon
++ Vercel + Brevo, all on free tiers).
 
 ## License
 
-MIT — built by [AyChEs](https://github.com/AyChEs).
+MIT.

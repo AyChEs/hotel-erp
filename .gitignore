@@ -29,3 +29,12 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Local AI tooling (Claude / opencode / etc.) — never commit this
+.agents/
+.claude/
+.copilot/
+.gemini/
+.cursor/
+.aitk/
+.aik/

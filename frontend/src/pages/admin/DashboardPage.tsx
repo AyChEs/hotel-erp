@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
@@ -8,7 +9,7 @@ import { useAuth } from '../../auth/AuthContext'
 import { ErrorNote } from '../../components/ui/Feedback'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { money, plusDaysIso, todayIso } from '../../lib/format'
-import { BOOKING_STATUS_LABEL } from '../../lib/labels'
+import { useLabels } from '../../lib/labels'
 import type { BookingStatus } from '../../api/types'
 
 const SERIES = '#1f747d' // teal-600 — single-hue charts, validated ≥3:1 on white
@@ -43,7 +44,10 @@ const tooltipStyle = {
 }
 
 export default function DashboardPage() {
+  const { t, i18n } = useTranslation()
+  const { tLabel } = useLabels()
   const { hasRole } = useAuth()
+  const locale = i18n.resolvedLanguage?.slice(0, 2) || 'es'
 
   const summary = useQuery({
     queryKey: ['dashboard', 'summary'],
@@ -61,7 +65,6 @@ export default function DashboardPage() {
     enabled: hasRole('ADMIN', 'MANAGER'),
   })
 
-  // Receptionists land on bookings: the dashboard is ADMIN/MANAGER only.
   if (!hasRole('ADMIN', 'MANAGER')) return <Navigate to="/admin/bookings" replace />
 
   if (summary.error) return <ErrorNote error={summary.error} />
@@ -72,33 +75,43 @@ export default function DashboardPage() {
     : []
   const maxStatus = Math.max(1, ...statusEntries.map(([, n]) => n))
 
+  // Locale-aware date / month label
+  const monthLabel = (m: string) => {
+    const d = new Date(`${m}-01T00:00:00`)
+    return d.toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-GB', { month: 'short' })
+  }
+  const dayMonthLabel = (d: string) => {
+    const date = new Date(`${d}T00:00:00`)
+    return date.toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-GB', { day: '2-digit', month: '2-digit' })
+  }
+
   return (
     <>
-      <PageHeader title="Dashboard" subtitle={`Situación a ${todayIso()}`} />
+      <PageHeader title={t('admin.dashboard.title')} subtitle={t('admin.dashboard.subtitle', { date: todayIso() })} />
 
       {/* KPI row */}
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {s ? (
           <>
             <StatTile
-              label="Ocupación hoy"
+              label={t('admin.dashboard.todayOccupancy')}
               value={`${s.occupancyRateToday}%`}
-              context={`${s.occupiedRoomsToday} de ${s.totalRooms} habitaciones`}
+              context={t('admin.dashboard.rooms', { occupied: s.occupiedRoomsToday, total: s.totalRooms })}
             />
             <StatTile
-              label="Ingresos del mes"
+              label={t('admin.dashboard.monthRevenue')}
               value={money(s.revenueThisMonth)}
-              context="facturas emitidas y pagadas"
+              context={t('admin.dashboard.revenueContext')}
             />
             <StatTile
-              label="Reservas del mes"
+              label={t('admin.dashboard.monthBookings')}
               value={String(s.bookingsThisMonth)}
-              context="creadas desde el día 1"
+              context={t('admin.dashboard.monthBookingsContext')}
             />
             <StatTile
-              label="Tareas pendientes"
+              label={t('admin.dashboard.pendingTasks')}
               value={String(s.pendingTasks)}
-              context="limpieza y mantenimiento"
+              context={t('admin.dashboard.pendingTasksContext')}
             />
           </>
         ) : (
@@ -107,7 +120,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <ChartCard title="Ingresos facturados por mes (últimos 12)">
+        <ChartCard title={t('admin.dashboard.revenueChart')}>
           {revenue.data ? (
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={revenue.data.points} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
@@ -115,7 +128,7 @@ export default function DashboardPage() {
                 <XAxis
                   dataKey="month"
                   tick={{ fontSize: 11, fill: MUTED }}
-                  tickFormatter={(m: string) => m.slice(5)}
+                  tickFormatter={monthLabel}
                   axisLine={{ stroke: GRID }}
                   tickLine={false}
                 />
@@ -127,7 +140,7 @@ export default function DashboardPage() {
                   width={48}
                 />
                 <Tooltip
-                  formatter={(value) => [money(Number(value)), 'Ingresos']}
+                  formatter={(value) => [money(Number(value)), t('admin.dashboard.revenue')]}
                   contentStyle={tooltipStyle}
                   cursor={{ fill: 'rgba(31,116,125,0.08)' }}
                 />
@@ -139,7 +152,7 @@ export default function DashboardPage() {
           )}
         </ChartCard>
 
-        <ChartCard title="Ocupación diaria — 2 semanas atrás y 2 adelante">
+        <ChartCard title={t('admin.dashboard.occupancyChart')}>
           {occupancy.data ? (
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={occupancy.data.points} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
@@ -147,7 +160,7 @@ export default function DashboardPage() {
                 <XAxis
                   dataKey="date"
                   tick={{ fontSize: 11, fill: MUTED }}
-                  tickFormatter={(d: string) => d.slice(8) + '/' + d.slice(5, 7)}
+                  tickFormatter={dayMonthLabel}
                   axisLine={{ stroke: GRID }}
                   tickLine={false}
                   interval={3}
@@ -161,7 +174,7 @@ export default function DashboardPage() {
                   width={40}
                 />
                 <Tooltip
-                  formatter={(value) => [`${value}%`, 'Ocupación']}
+                  formatter={(value) => [`${value}%`, t('admin.dashboard.occupancy')]}
                   labelFormatter={(d) => String(d)}
                   contentStyle={tooltipStyle}
                 />
@@ -182,11 +195,11 @@ export default function DashboardPage() {
       </div>
 
       {/* Status breakdown: identity carried by the row label, single hue */}
-      <ChartCard title="Reservas por estado (histórico)">
+      <ChartCard title={t('admin.dashboard.bookingsByStatus')}>
         <div className="mt-2 space-y-2">
           {statusEntries.map(([status, count]) => (
             <div key={status} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-3 text-sm">
-              <span className="text-teal-800">{BOOKING_STATUS_LABEL[status]}</span>
+              <span className="text-teal-800">{tLabel('bookingStatus', status)}</span>
               <div className="h-4 rounded-[4px] bg-glaze-100">
                 <div
                   className="h-4 rounded-[4px]"

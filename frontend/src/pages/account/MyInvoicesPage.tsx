@@ -1,13 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { meApi } from '../../api/endpoints'
 import type { InvoiceDto } from '../../api/types'
 import { InvoiceBadge } from '../../components/ui/StatusBadge'
 import { EmptyState, ErrorNote, ListSkeleton } from '../../components/ui/Feedback'
 import { dateTime, money } from '../../lib/format'
-import { PAYMENT_LABEL } from '../../lib/labels'
+import { useLabels } from '../../lib/labels'
 
 function InvoiceDetail({ invoice, onClose }: { invoice: InvoiceDto; onClose: () => void }) {
+  const { t } = useTranslation()
+  const { tLabel } = useLabels()
   return (
     <div className="card-tile-accent p-6 print:border-none print:shadow-none">
       <div className="mb-4 flex items-start justify-between">
@@ -20,41 +23,41 @@ function InvoiceDetail({ invoice, onClose }: { invoice: InvoiceDto; onClose: () 
 
       <dl className="mb-6 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
         <div className="flex justify-between sm:block">
-          <dt className="text-teal-800">Cliente</dt>
+          <dt className="text-teal-800">{t('account.myInvoices.client')}</dt>
           <dd className="font-medium text-teal-900">{invoice.clientFullName}</dd>
         </div>
         <div className="flex justify-between sm:block">
-          <dt className="text-teal-800">Hotel</dt>
+          <dt className="text-teal-800">{t('account.myInvoices.hotel')}</dt>
           <dd className="font-medium text-teal-900">{invoice.hotelName}</dd>
         </div>
         <div className="flex justify-between sm:block">
-          <dt className="text-teal-800">Reserva</dt>
+          <dt className="text-teal-800">{t('account.myInvoices.booking')}</dt>
           <dd className="font-medium text-teal-900">{invoice.bookingCode}</dd>
         </div>
         <div className="flex justify-between sm:block">
-          <dt className="text-teal-800">Método de pago</dt>
-          <dd className="font-medium text-teal-900">{PAYMENT_LABEL[invoice.paymentMethod]}</dd>
+          <dt className="text-teal-800">{t('admin.invoices.method')}</dt>
+          <dd className="font-medium text-teal-900">{tLabel('paymentMethod', invoice.paymentMethod)}</dd>
         </div>
       </dl>
 
       <table className="w-full text-sm">
         <tbody>
           <tr className="border-t border-glaze-200">
-            <td className="py-2 text-teal-800">Base imponible</td>
+            <td className="py-2 text-teal-800">{t('account.myInvoices.subtotal')}</td>
             <td className="py-2 text-right font-medium text-teal-900">
               {money(invoice.subtotal)}
             </td>
           </tr>
           <tr className="border-t border-glaze-200">
             <td className="py-2 text-teal-800">
-              IVA ({Math.round(invoice.vatRate * 100)}%)
+              {t('account.myInvoices.vat', { rate: Math.round(invoice.vatRate * 100) })}
             </td>
             <td className="py-2 text-right font-medium text-teal-900">
               {money(invoice.vatAmount)}
             </td>
           </tr>
           <tr className="border-t-2 border-teal-800">
-            <td className="py-2 font-semibold text-teal-900">Total</td>
+            <td className="py-2 font-semibold text-teal-900">{t('admin.invoices.total')}</td>
             <td className="py-2 text-right text-lg font-semibold text-teal-900">
               {money(invoice.total)}
             </td>
@@ -64,10 +67,10 @@ function InvoiceDetail({ invoice, onClose }: { invoice: InvoiceDto; onClose: () 
 
       <div className="mt-6 flex gap-3 print:hidden">
         <button className="btn-primary" onClick={() => window.print()}>
-          Imprimir / PDF
+          {t('account.myInvoices.print')}
         </button>
         <button className="btn-ghost" onClick={onClose}>
-          Volver
+          {t('common.back')}
         </button>
       </div>
     </div>
@@ -75,6 +78,7 @@ function InvoiceDetail({ invoice, onClose }: { invoice: InvoiceDto; onClose: () 
 }
 
 export default function MyInvoicesPage() {
+  const { t } = useTranslation()
   const [selected, setSelected] = useState<InvoiceDto | null>(null)
   const { data, isPending, error } = useQuery({
     queryKey: ['me', 'invoices'],
@@ -87,8 +91,8 @@ export default function MyInvoicesPage() {
   if (!data || data.content.length === 0) {
     return (
       <EmptyState
-        title="Sin facturas todavía"
-        hint="Cuando el hotel facture una de tus reservas, podrás consultarla e imprimirla aquí."
+        title={t('account.myInvoices.emptyTitle')}
+        hint={t('account.myInvoices.emptyHint')}
       />
     )
   }
@@ -98,11 +102,11 @@ export default function MyInvoicesPage() {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-glaze-200 text-left text-xs tracking-wide text-teal-800 uppercase">
-            <th className="px-4 py-3 font-semibold">Número</th>
-            <th className="px-4 py-3 font-semibold">Fecha</th>
-            <th className="px-4 py-3 font-semibold">Hotel</th>
-            <th className="px-4 py-3 font-semibold">Estado</th>
-            <th className="px-4 py-3 text-right font-semibold">Total</th>
+            <th className="px-4 py-3 font-semibold">{t('account.myInvoices.number')}</th>
+            <th className="px-4 py-3 font-semibold">{t('account.myInvoices.date')}</th>
+            <th className="px-4 py-3 font-semibold">{t('account.myInvoices.hotel')}</th>
+            <th className="px-4 py-3 font-semibold">{t('account.myInvoices.status')}</th>
+            <th className="px-4 py-3 text-right font-semibold">{t('admin.invoices.total')}</th>
             <th className="px-4 py-3" />
           </tr>
         </thead>
@@ -123,7 +127,7 @@ export default function MyInvoicesPage() {
                   className="text-sm font-medium text-teal-600 hover:text-teal-500"
                   onClick={() => setSelected(invoice)}
                 >
-                  Ver
+                  {t('account.myInvoices.view')}
                 </button>
               </td>
             </tr>

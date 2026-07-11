@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 const tab = ({ isActive }: { isActive: boolean }) =>
   `rounded-(--radius-tile) px-4 py-2 text-sm font-medium transition-colors duration-150 ${
@@ -7,19 +8,20 @@ const tab = ({ isActive }: { isActive: boolean }) =>
 
 /** Client area: rendered inside PublicShell; adds heading + tabbed sub-nav. */
 export function AccountShell() {
+  const { t } = useTranslation()
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <h1 className="font-display mb-1 text-2xl text-teal-900">Mi cuenta</h1>
+      <h1 className="font-display mb-1 text-2xl text-teal-900">{t('public.nav.myAccount')}</h1>
       <div className="divider-arabesque mb-6 max-w-55 text-sm">◆</div>
-      <nav aria-label="Mi cuenta" className="mb-6 flex flex-wrap gap-2">
+      <nav aria-label={t('public.nav.myAccount')} className="mb-6 flex flex-wrap gap-2">
         <NavLink to="/account" end className={tab}>
-          Mis reservas
+          {t('account.nav.myBookings')}
         </NavLink>
         <NavLink to="/account/invoices" className={tab}>
-          Mis facturas
+          {t('account.nav.myInvoices')}
         </NavLink>
         <NavLink to="/account/profile" className={tab}>
-          Mi perfil
+          {t('account.nav.profile')}
         </NavLink>
       </nav>
       <Outlet />

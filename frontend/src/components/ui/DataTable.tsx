@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { PageResponse } from '../../api/types'
 import { EmptyState, ErrorNote } from './Feedback'
 
@@ -24,6 +25,7 @@ interface Props<T> {
 export function DataTable<T>({
   columns, data, isPending, error, page, onPageChange, emptyTitle, emptyHint, rowKey,
 }: Props<T>) {
+  const { t } = useTranslation()
   if (error) return <ErrorNote error={error} />
 
   if (isPending) {
@@ -77,11 +79,11 @@ export function DataTable<T>({
 
       {data.totalPages > 1 && (
         <nav
-          aria-label="Paginación"
+          aria-label={t('dataTable.ariaLabel')}
           className="flex items-center justify-between border-t border-glaze-200 px-4 py-3 text-sm"
         >
           <span className="text-teal-800">
-            Página {data.page + 1} de {data.totalPages} · {data.totalElements} registros
+            {t('dataTable.page', { page: data.page + 1, total: data.totalPages, count: data.totalElements })}
           </span>
           <div className="flex gap-2">
             <button
@@ -89,14 +91,14 @@ export function DataTable<T>({
               disabled={page === 0}
               onClick={() => onPageChange(page - 1)}
             >
-              ← Anterior
+              ← {t('common.previous')}
             </button>
             <button
               className="btn-ghost px-3 py-1"
               disabled={page + 1 >= data.totalPages}
               onClick={() => onPageChange(page + 1)}
             >
-              Siguiente →
+              {t('common.next')} →
             </button>
           </div>
         </nav>

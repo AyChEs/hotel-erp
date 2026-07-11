@@ -1,36 +1,27 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../auth/AuthContext'
+import { LanguageSwitcher } from '../../i18n/LanguageSwitcher'
 import type { Role } from '../../api/types'
-
-interface Item {
-  to: string
-  label: string
-  icon: string
-  roles?: Role[]
-}
-
-const ITEMS: Item[] = [
-  { to: '/admin', label: 'Dashboard', icon: '▦', roles: ['ADMIN', 'MANAGER'] },
-  { to: '/admin/bookings', label: 'Reservas', icon: '◫' },
-  { to: '/admin/calendar', label: 'Calendario', icon: '▤' },
-  { to: '/admin/invoices', label: 'Facturas', icon: '▥' },
-  { to: '/admin/clients', label: 'Clientes', icon: '◧' },
-  { to: '/admin/tasks', label: 'Tareas', icon: '◨' },
-  { to: '/admin/hotels', label: 'Hoteles', icon: '⬡', roles: ['ADMIN'] },
-  { to: '/admin/rooms', label: 'Habitaciones', icon: '⬢', roles: ['ADMIN', 'MANAGER'] },
-  { to: '/admin/categories', label: 'Categorías', icon: '✦', roles: ['ADMIN'] },
-  { to: '/admin/employees', label: 'Empleados', icon: '◩', roles: ['ADMIN', 'MANAGER'] },
-]
-
-const ROLE_LABEL: Record<Role, string> = {
-  ADMIN: 'Administración',
-  MANAGER: 'Dirección',
-  RECEPTIONIST: 'Recepción',
-  CLIENT: 'Cliente',
-}
+import { useLabels } from '../../lib/labels'
 
 export function AdminShell() {
   const { user, logout, hasRole } = useAuth()
+  const { t } = useTranslation()
+  const { tLabel } = useLabels()
+
+  const items: { to: string; label: string; icon: string; roles?: Role[] }[] = [
+    { to: '/admin', label: t('admin.nav.dashboard'), icon: '▦', roles: ['ADMIN', 'MANAGER'] },
+    { to: '/admin/bookings', label: t('admin.nav.bookings'), icon: '◫' },
+    { to: '/admin/calendar', label: t('admin.nav.calendar'), icon: '▤' },
+    { to: '/admin/invoices', label: t('admin.nav.invoices'), icon: '▥' },
+    { to: '/admin/clients', label: t('admin.nav.clients'), icon: '◧' },
+    { to: '/admin/tasks', label: t('admin.nav.tasks'), icon: '◨' },
+    { to: '/admin/hotels', label: t('admin.nav.hotels'), icon: '⬡', roles: ['ADMIN'] },
+    { to: '/admin/rooms', label: t('admin.nav.rooms'), icon: '⬢', roles: ['ADMIN', 'MANAGER'] },
+    { to: '/admin/categories', label: t('admin.nav.categories'), icon: '✦', roles: ['ADMIN'] },
+    { to: '/admin/employees', label: t('admin.nav.employees'), icon: '◩', roles: ['ADMIN', 'MANAGER'] },
+  ]
 
   return (
     <div className="flex min-h-screen bg-glaze-50">
@@ -40,7 +31,7 @@ export function AdminShell() {
         </Link>
         <div className="mx-5 mb-4 h-px bg-gold-500/30" />
         <nav className="flex-1 space-y-0.5 px-3">
-          {ITEMS.filter((item) => !item.roles || hasRole(...item.roles)).map((item) => (
+          {items.filter((item) => !item.roles || hasRole(...item.roles)).map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -62,12 +53,13 @@ export function AdminShell() {
         </nav>
         <div className="border-t border-gold-500/20 p-4 text-xs text-glaze-100/70">
           <p className="truncate font-medium text-glaze-50">{user?.email}</p>
-          <p className="mb-2 text-gold-400">{user && ROLE_LABEL[user.role]}</p>
+          <p className="mb-2 text-gold-400">{user && tLabel('employeePosition', user.role)}</p>
+          <LanguageSwitcher className="mb-2" />
           <button
             onClick={logout}
             className="w-full rounded-(--radius-tile) border border-gold-500/40 px-2 py-1.5 text-gold-300 transition hover:bg-teal-900"
           >
-            Cerrar sesión
+            {t('common.logout')}
           </button>
         </div>
       </aside>

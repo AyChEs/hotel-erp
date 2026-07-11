@@ -1,8 +1,5 @@
 import type { BookingStatus, InvoiceStatus, RoomStatus, TaskPriority, TaskStatus } from '../../api/types'
-import {
-  BOOKING_STATUS_LABEL, INVOICE_STATUS_LABEL, ROOM_STATUS_LABEL,
-  TASK_PRIORITY_LABEL, TASK_STATUS_LABEL,
-} from '../../lib/labels'
+import { useLabels } from '../../lib/labels'
 
 const BOOKING_TONE: Record<BookingStatus, string> = {
   PENDING: 'bg-gold-100 text-gold-600',
@@ -40,22 +37,27 @@ const PRIORITY_TONE: Record<TaskPriority, string> = {
   URGENT: 'bg-terra-100 text-terra-600',
 }
 
-export const BookingBadge = ({ status }: { status: BookingStatus }) => (
-  <span className={`badge ${BOOKING_TONE[status]}`}>{BOOKING_STATUS_LABEL[status]}</span>
-)
+export const BookingBadge = ({ status }: { status: BookingStatus }) => {
+  const { tLabel } = useLabels()
+  return <span className={`badge ${BOOKING_TONE[status]}`}>{tLabel('bookingStatus', status)}</span>
+}
 
-export const InvoiceBadge = ({ status }: { status: InvoiceStatus }) => (
-  <span className={`badge ${INVOICE_TONE[status]}`}>{INVOICE_STATUS_LABEL[status]}</span>
-)
+export const InvoiceBadge = ({ status }: { status: InvoiceStatus }) => {
+  const { tLabel } = useLabels()
+  return <span className={`badge ${INVOICE_TONE[status]}`}>{tLabel('invoiceStatus', status)}</span>
+}
 
-export const RoomBadge = ({ status }: { status: RoomStatus }) => (
-  <span className={`badge ${ROOM_TONE[status]}`}>{ROOM_STATUS_LABEL[status]}</span>
-)
+export const RoomBadge = ({ status }: { status: RoomStatus }) => {
+  const { tLabel } = useLabels()
+  return <span className={`badge ${ROOM_TONE[status]}`}>{tLabel('roomStatus', status)}</span>
+}
 
-export const TaskBadge = ({ status }: { status: TaskStatus }) => (
-  <span className={`badge ${TASK_TONE[status]}`}>{TASK_STATUS_LABEL[status]}</span>
-)
+export const TaskBadge = ({ status }: { status: TaskStatus }) => {
+  const { tLabel } = useLabels()
+  return <span className={`badge ${TASK_TONE[status]}`}>{tLabel('taskStatus', status)}</span>
+}
 
-export const PriorityBadge = ({ priority }: { priority: TaskPriority }) => (
-  <span className={`badge ${PRIORITY_TONE[priority]}`}>{TASK_PRIORITY_LABEL[priority]}</span>
-)
+export const PriorityBadge = ({ priority }: { priority: TaskPriority }) => {
+  const { tLabel } = useLabels()
+  return <span className={`badge ${PRIORITY_TONE[priority]}`}>{tLabel('taskPriority', priority)}</span>
+}

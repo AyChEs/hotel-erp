@@ -3,22 +3,23 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth/AuthContext'
 import { homeFor } from '../auth/ProtectedRoute'
 import { problemMessage } from '../api/client'
 
-const schema = z.object({
-  email: z.email('Email no válido'),
-  password: z.string().min(1, 'Introduce tu contraseña'),
-})
-
-type FormValues = z.infer<typeof schema>
-
 export function LoginPage() {
+  const { t } = useTranslation()
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [serverError, setServerError] = useState<string | null>(null)
+
+  const schema = z.object({
+    email: z.email(t('auth.validation.emailInvalid')),
+    password: z.string().min(1, t('auth.validation.passwordRequired')),
+  })
+  type FormValues = z.infer<typeof schema>
 
   const {
     register,
@@ -40,13 +41,13 @@ export function LoginPage() {
   return (
     <div className="bg-arabesque-light flex min-h-[70vh] items-center justify-center px-4 py-12">
       <div className="card-tile-accent w-full max-w-md p-8">
-        <h1 className="mb-1 text-center text-2xl text-teal-900">Bienvenido de nuevo</h1>
+        <h1 className="mb-1 text-center text-2xl text-teal-900">{t('auth.login.title')}</h1>
         <div className="divider-arabesque mx-auto mb-6 max-w-45 text-sm">◆</div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
           <div>
             <label htmlFor="email" className="field-label">
-              Email
+              {t('auth.login.email')}
             </label>
             <input
               id="email"
@@ -61,7 +62,7 @@ export function LoginPage() {
 
           <div>
             <label htmlFor="password" className="field-label">
-              Contraseña
+              {t('auth.login.password')}
             </label>
             <input
               id="password"
@@ -80,19 +81,19 @@ export function LoginPage() {
           )}
 
           <button type="submit" disabled={isSubmitting} className="btn-primary w-full">
-            {isSubmitting ? 'Entrando…' : 'Iniciar sesión'}
+            {isSubmitting ? t('auth.login.submitting') : t('auth.login.submit')}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-teal-800">
-          ¿Aún no tienes cuenta?{' '}
+          {t('auth.login.noAccount')}{' '}
           <Link to="/register" className="font-medium text-gold-600 hover:text-gold-500">
-            Regístrate
+            {t('auth.login.register')}
           </Link>
         </p>
 
         <div className="mt-6 rounded-(--radius-tile) bg-teal-50 p-3 text-xs text-teal-800">
-          <p className="mb-1 font-semibold">Cuentas de demostración</p>
+          <p className="mb-1 font-semibold">{t('auth.login.demoAccounts')}</p>
           <p>admin@hotel-erp.dev · Admin123!</p>
           <p>manager@hotel-erp.dev · Manager123!</p>
           <p>reception@hotel-erp.dev · Reception123!</p>

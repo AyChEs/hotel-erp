@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { hotelApi, meApi, roomApi } from '../../api/endpoints'
 import type { BoardType, RoomDto } from '../../api/types'
 import { useAuth } from '../../auth/AuthContext'
 import { problemMessage } from '../../api/client'
 import { money, nights, plusDaysIso, todayIso } from '../../lib/format'
-import { BOARD_LABEL, ROOM_TYPE_LABEL } from '../../lib/labels'
+import { useLabels } from '../../lib/labels'
 import { EmptyState, ErrorNote, ListSkeleton } from '../../components/ui/Feedback'
 
 function roomTotal(room: RoomDto, board: BoardType, guestCount: number, nightCount: number) {
@@ -20,6 +21,8 @@ function roomTotal(room: RoomDto, board: BoardType, guestCount: number, nightCou
 }
 
 export default function HotelDetailPage() {
+  const { t } = useTranslation()
+  const { tLabel } = useLabels()
   const { id } = useParams()
   const hotelId = Number(id)
   const [params, setParams] = useSearchParams()
@@ -84,12 +87,12 @@ export default function HotelDetailPage() {
         <div className="relative mx-auto max-w-6xl px-4 py-12">
           <p className="text-sm text-gold-300">
             <Link to="/hotels" className="hover:text-gold-200">
-              Hoteles
+              {t('public.hotelDetail.breadcrumb')}
             </Link>{' '}
             / {hotel?.city ?? '…'}
           </p>
           <h1 className="font-display mt-1 text-3xl text-glaze-50 md:text-4xl">
-            {hotel?.name ?? 'Cargando…'}
+            {hotel?.name ?? t('public.hotelDetail.loading')}
           </h1>
           {hotel && (
             <p className="mt-2 max-w-2xl text-sm text-glaze-100/85">
@@ -112,7 +115,7 @@ export default function HotelDetailPage() {
         >
           <div>
             <label htmlFor="checkIn" className="field-label">
-              Entrada
+              {t('public.landing.checkIn')}
             </label>
             <input
               id="checkIn"
@@ -125,7 +128,7 @@ export default function HotelDetailPage() {
           </div>
           <div>
             <label htmlFor="checkOut" className="field-label">
-              Salida
+              {t('public.landing.checkOut')}
             </label>
             <input
               id="checkOut"
@@ -138,7 +141,7 @@ export default function HotelDetailPage() {
           </div>
           <div>
             <label htmlFor="guests" className="field-label">
-              Huéspedes
+              {t('public.landing.guests')}
             </label>
             <input
               id="guests"
@@ -152,7 +155,7 @@ export default function HotelDetailPage() {
           </div>
           <div>
             <label htmlFor="board" className="field-label">
-              Régimen
+              {t('public.hotelDetail.board')}
             </label>
             <select
               id="board"
@@ -160,16 +163,16 @@ export default function HotelDetailPage() {
               value={board}
               onChange={(e) => setBoard(e.target.value as BoardType)}
             >
-              {Object.entries(BOARD_LABEL).map(([value, label]) => (
+              {(['ROOM_ONLY','BED_AND_BREAKFAST','HALF_BOARD','FULL_BOARD'] as BoardType[]).map((value) => (
                 <option key={value} value={value}>
-                  {label}
+                  {tLabel('boardType', value)}
                 </option>
               ))}
             </select>
           </div>
           <div className="flex items-end">
             <button type="submit" className="btn-primary w-full">
-              Actualizar
+              {t('public.hotelDetail.update')}
             </button>
           </div>
         </form>
@@ -179,10 +182,9 @@ export default function HotelDetailPage() {
             role="status"
             className="mb-6 rounded-(--radius-tile) border border-teal-600/30 bg-teal-50 px-4 py-3 text-sm text-teal-800"
           >
-            Reserva <strong>{bookedCode}</strong> creada: pendiente de confirmación por el
-            hotel. La verás en{' '}
+            {t('public.hotelDetail.bookedCreated', { code: bookedCode })}{' '}
             <Link to="/account" className="font-medium text-teal-600 underline">
-              Mis reservas
+              {t('public.hotelDetail.myBookings')}
             </Link>
             .
           </div>
@@ -191,10 +193,11 @@ export default function HotelDetailPage() {
 
         {/* Rooms */}
         <h2 className="font-display mb-4 text-2xl text-teal-900">
-          Habitaciones disponibles
+          {t('public.hotelDetail.roomsTitle')}
           <span className="ml-3 align-middle text-sm font-sans text-teal-800">
-            {checkIn} → {checkOut} · {nightCount} noche{nightCount === 1 ? '' : 's'} ·{' '}
-            {guests} huésped{guests === 1 ? '' : 'es'}
+            {checkIn} → {checkOut} ·{' '}
+            {t('public.hotelDetail.nights', { count: nightCount })} ·{' '}
+            {t('public.hotelDetail.guests', { count: guests })}
           </span>
         </h2>
 
@@ -204,8 +207,8 @@ export default function HotelDetailPage() {
           <ErrorNote error={availability.error} />
         ) : availability.data && availability.data.length === 0 ? (
           <EmptyState
-            title="No hay habitaciones libres para esas fechas"
-            hint="Cambia las fechas o reduce el número de huéspedes; el hotel podría tener disponibilidad cercana."
+            title={t('public.hotelDetail.noRoomsTitle')}
+            hint={t('public.hotelDetail.noRoomsHint')}
           />
         ) : (
           <div className="space-y-4">
@@ -219,32 +222,32 @@ export default function HotelDetailPage() {
                   {room.imageUrl && (
                     <img
                       src={room.imageUrl}
-                      alt={`Habitación ${room.number}`}
+                      alt={`${t('public.hotelDetail.roomsTitle')} ${room.number}`}
                       loading="lazy"
                       className="h-32 w-full shrink-0 rounded-(--radius-tile) object-cover sm:h-24 sm:w-40"
                     />
                   )}
                   <div className="min-w-0 flex-1">
                     <h3 className="font-medium text-teal-900">
-                      Habitación {room.number} — {ROOM_TYPE_LABEL[room.type]}
+                      {tLabel('roomType', room.type)} — {room.number}
                     </h3>
                     <p className="mt-0.5 text-sm text-teal-800">
-                      Hasta {room.capacity} personas
-                      {room.floor != null && ` · planta ${room.floor}`}
+                      {t('public.hotelDetail.capacity', { count: room.capacity })}
+                      {room.floor != null && ` · ${t('public.hotelDetail.floor', { n: room.floor })}`}
                       {room.description && ` · ${room.description}`}
                     </p>
                     <p className="mt-1 text-sm text-teal-800">
-                      {money(room.pricePerNight)}/noche
+                      {money(room.pricePerNight)}{t('public.hotelDetail.perNight')}
                       {board === 'HALF_BOARD' &&
-                        ` + ${money(room.halfBoardSupplement)}/persona media pensión`}
+                        ` · ${t('public.hotelDetail.halfBoardSupplement', { price: money(room.halfBoardSupplement) })}`}
                       {board === 'FULL_BOARD' &&
-                        ` + ${money(room.fullBoardSupplement)}/persona pensión completa`}
+                        ` · ${t('public.hotelDetail.fullBoardSupplement', { price: money(room.fullBoardSupplement) })}`}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-4">
                     <div className="text-right">
                       <p className="text-lg font-semibold text-teal-900">{money(total)}</p>
-                      <p className="text-xs text-teal-800">total, IVA incluido</p>
+                      <p className="text-xs text-teal-800">{t('public.hotelDetail.total')}</p>
                     </div>
                     {canBook ? (
                       <button
@@ -252,11 +255,11 @@ export default function HotelDetailPage() {
                         disabled={book.isPending}
                         onClick={() => book.mutate(room.id)}
                       >
-                        {book.isPending ? 'Reservando…' : 'Reservar'}
+                        {book.isPending ? t('public.hotelDetail.bookingPending') : t('public.hotelDetail.booking')}
                       </button>
                     ) : user ? (
                       <span className="text-xs text-teal-800">
-                        Solo los clientes pueden reservar online
+                        {t('public.hotelDetail.clientOnly')}
                       </span>
                     ) : (
                       <button
@@ -267,7 +270,7 @@ export default function HotelDetailPage() {
                           })
                         }
                       >
-                        Entra para reservar
+                        {t('public.hotelDetail.loginToBook')}
                       </button>
                     )}
                   </div>
@@ -279,8 +282,7 @@ export default function HotelDetailPage() {
 
         {book.error && problemMessage(book.error).includes('available') && (
           <p className="mt-4 text-sm text-teal-800">
-            Otra persona pudo haber reservado esa habitación hace un momento; la lista se
-            actualiza automáticamente.
+            {t('public.hotelDetail.roomTakenHint')}
           </p>
         )}
       </div>

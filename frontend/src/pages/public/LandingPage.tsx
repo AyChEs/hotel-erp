@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { hotelApi } from '../../api/endpoints'
 import { plusDaysIso, todayIso } from '../../lib/format'
 import { ListSkeleton } from '../../components/ui/Feedback'
@@ -10,6 +11,7 @@ const HERO_IMG =
   'https://images.unsplash.com/photo-1539020140153-e479b8c22e70?w=1800&q=70'
 
 export default function LandingPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const reduced = useReducedMotion()
   const [checkIn, setCheckIn] = useState(plusDaysIso(7))
@@ -54,17 +56,16 @@ export default function LandingPage() {
         <div className="bg-arabesque absolute inset-0 opacity-55" aria-hidden />
         <div className="relative mx-auto max-w-6xl px-4 py-24 lg:py-32">
           <motion.p {...rise(0)} className="mb-3 text-sm text-gold-300">
-            Zellige Hotels · Granada · Marrakech · Barcelona
+            {t('public.landing.kicker')}
           </motion.p>
           <motion.h1
             {...rise(0.08)}
             className="font-display max-w-3xl text-4xl leading-tight text-white md:text-6xl"
           >
-            La hospitalidad es un oficio. Nosotros lo ejercemos con precisión.
+            {t('public.landing.title')}
           </motion.h1>
           <motion.p {...rise(0.16)} className="mt-5 max-w-xl text-lg text-glaze-100/90">
-            Tres hoteles con carácter. Reserva directa, confirmación al instante y
-            factura sin sorpresas.
+            {t('public.landing.subtitle')}
           </motion.p>
 
           <motion.form
@@ -73,28 +74,28 @@ export default function LandingPage() {
             className="card-tile-accent mt-10 grid max-w-3xl gap-4 p-5 sm:grid-cols-[1fr_1fr_auto_auto]"
           >
             <div>
-              <label htmlFor="checkIn" className="field-label">Entrada</label>
+              <label htmlFor="checkIn" className="field-label">{t('public.landing.checkIn')}</label>
               <input
                 id="checkIn" type="date" className="field-input" value={checkIn}
                 min={todayIso()} onChange={(e) => setCheckIn(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="checkOut" className="field-label">Salida</label>
+              <label htmlFor="checkOut" className="field-label">{t('public.landing.checkOut')}</label>
               <input
                 id="checkOut" type="date" className="field-input" value={checkOut}
                 min={checkIn} onChange={(e) => setCheckOut(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="guests" className="field-label">Huéspedes</label>
+              <label htmlFor="guests" className="field-label">{t('public.landing.guests')}</label>
               <input
                 id="guests" type="number" min={1} max={10} className="field-input w-24"
                 value={guests} onChange={(e) => setGuests(Number(e.target.value))}
               />
             </div>
             <div className="flex items-end">
-              <button type="submit" className="btn-gold w-full">Buscar</button>
+              <button type="submit" className="btn-gold w-full">{t('public.landing.search')}</button>
             </div>
           </motion.form>
         </div>
@@ -103,9 +104,9 @@ export default function LandingPage() {
       {/* Hotels */}
       <section className="mx-auto max-w-6xl px-4 py-16">
         <div className="mb-8 flex items-end justify-between">
-          <h2 className="font-display text-3xl text-teal-900">Nuestros hoteles</h2>
+          <h2 className="font-display text-3xl text-teal-900">{t('public.landing.hotelsTitle')}</h2>
           <Link to="/hotels" className="text-sm font-medium text-teal-600 hover:text-teal-500">
-            Ver todos →
+            {t('common.seeAll')}
           </Link>
         </div>
 
@@ -129,7 +130,7 @@ export default function LandingPage() {
                     {hotel.imageUrl && (
                       <img
                         src={hotel.imageUrl}
-                        alt={`Fachada de ${hotel.name}`}
+                        alt={hotel.name}
                         loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:group-hover:scale-100"
                       />
@@ -156,25 +157,25 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 py-14">
           <div className="grid gap-10 md:grid-cols-[1.2fr_2fr]">
             <h2 className="font-display text-2xl text-teal-900">
-              Reservar directo tiene ventajas
+              {t('public.landing.whyTitle')}
             </h2>
             <dl className="grid gap-6 sm:grid-cols-3">
               <div>
-                <dt className="font-medium text-teal-900">Confirmación inmediata</dt>
+                <dt className="font-medium text-teal-900">{t('public.landing.why1Title')}</dt>
                 <dd className="mt-1 text-sm text-teal-800">
-                  Tu reserva entra directamente en el sistema del hotel, con email al momento.
+                  {t('public.landing.why1Body')}
                 </dd>
               </div>
               <div>
-                <dt className="font-medium text-teal-900">Cancelación flexible</dt>
+                <dt className="font-medium text-teal-900">{t('public.landing.why2Title')}</dt>
                 <dd className="mt-1 text-sm text-teal-800">
-                  Cancela cualquier reserva pendiente o confirmada desde tu cuenta, sin llamadas.
+                  {t('public.landing.why2Body')}
                 </dd>
               </div>
               <div>
-                <dt className="font-medium text-teal-900">Factura sin sorpresas</dt>
+                <dt className="font-medium text-teal-900">{t('public.landing.why3Title')}</dt>
                 <dd className="mt-1 text-sm text-teal-800">
-                  Precio cerrado por noche y régimen, con IVA desglosado en tu factura.
+                  {t('public.landing.why3Body')}
                 </dd>
               </div>
             </dl>

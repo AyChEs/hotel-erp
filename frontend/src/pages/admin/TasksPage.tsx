@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { employeeApi, hotelApi, roomApi, taskApi } from '../../api/endpoints'
 import type { TaskDto, TaskStatus } from '../../api/types'
 import { problemMessage } from '../../api/client'
@@ -8,11 +9,13 @@ import { PageHeader } from '../../components/ui/PageHeader'
 import { PriorityBadge } from '../../components/ui/StatusBadge'
 import { EmptyState, ErrorNote, ListSkeleton } from '../../components/ui/Feedback'
 import { date } from '../../lib/format'
-import { TASK_PRIORITY_LABEL, TASK_STATUS_LABEL, TASK_TYPE_LABEL } from '../../lib/labels'
+import { useLabels } from '../../lib/labels'
 
 const COLUMNS: TaskStatus[] = ['PENDING', 'IN_PROGRESS', 'DONE']
 
 function TaskForm({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation()
+  const { tLabel } = useLabels()
   const [hotelId, setHotelId] = useState<number | ''>('')
   const [roomId, setRoomId] = useState<number | ''>('')
   const [assignees, setAssignees] = useState<number[]>([])
@@ -57,28 +60,32 @@ function TaskForm({ onDone }: { onDone: () => void }) {
       }}
     >
       <div>
-        <label className="field-label" htmlFor="t-title">Título</label>
+        <label className="field-label" htmlFor="t-title">{t('admin.tasks.titleLabel')}</label>
         <input id="t-title" name="title" className="field-input" required maxLength={150} />
       </div>
       <div>
-        <label className="field-label" htmlFor="t-desc">Descripción</label>
+        <label className="field-label" htmlFor="t-desc">{t('admin.tasks.description')}</label>
         <textarea id="t-desc" name="description" className="field-input" rows={2} maxLength={1000} />
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label className="field-label" htmlFor="t-type">Tipo</label>
+          <label className="field-label" htmlFor="t-type">{t('admin.tasks.type')}</label>
           <select id="t-type" name="type" className="field-input" defaultValue="CLEANING">
-            {Object.entries(TASK_TYPE_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            {(['CLEANING','MAINTENANCE','OTHER'] as const).map((v) => (
+              <option key={v} value={v}>{tLabel('taskType', v)}</option>
+            ))}
           </select>
         </div>
         <div>
-          <label className="field-label" htmlFor="t-priority">Prioridad</label>
+          <label className="field-label" htmlFor="t-priority">{t('admin.tasks.priority')}</label>
           <select id="t-priority" name="priority" className="field-input" defaultValue="MEDIUM">
-            {Object.entries(TASK_PRIORITY_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            {(['LOW','MEDIUM','HIGH','URGENT'] as const).map((v) => (
+              <option key={v} value={v}>{tLabel('taskPriority', v)}</option>
+            ))}
           </select>
         </div>
         <div>
-          <label className="field-label" htmlFor="t-due">Fecha límite</label>
+          <label className="field-label" htmlFor="t-due">{t('admin.tasks.dueDate')}</label>
           <input id="t-due" name="dueDate" type="date" className="field-input" />
         </div>
       </div>
@@ -86,27 +93,27 @@ function TaskForm({ onDone }: { onDone: () => void }) {
         <div>
           <label className="field-label" htmlFor="t-hotel">Hotel</label>
           <select
-            id="t-hotel" className="field-input" required value={hotelId}
+            id="t-hotel" name="hotelId" className="field-input" required value={hotelId}
             onChange={(e) => { setHotelId(Number(e.target.value)); setRoomId(''); setAssignees([]) }}
           >
-            <option value="" disabled>Elige hotel…</option>
+            <option value="" disabled>{t('admin.invoices.pickBooking').replace('reserva', 'hotel')}</option>
             {hotels.data?.content.map((h) => <option key={h.id} value={h.id}>{h.name}</option>)}
           </select>
         </div>
         <div>
-          <label className="field-label" htmlFor="t-room">Habitación (opcional)</label>
+          <label className="field-label" htmlFor="t-room">{t('admin.tasks.roomOptional')}</label>
           <select
-            id="t-room" className="field-input" value={roomId}
+            id="t-room" name="roomId" className="field-input" value={roomId}
             onChange={(e) => setRoomId(e.target.value === '' ? '' : Number(e.target.value))}
             disabled={hotelId === ''}
           >
-            <option value="">— Sin habitación —</option>
+            <option value="">— {t('admin.rooms.title')} —</option>
             {rooms.data?.content.map((r) => <option key={r.id} value={r.id}>{r.number}</option>)}
           </select>
         </div>
       </div>
       <div>
-        <label className="field-label" htmlFor="t-assignees">Asignar a (Ctrl+clic para varios)</label>
+        <label className="field-label" htmlFor="t-assignees">{t('admin.tasks.assigneeHint')}</label>
         <select
           id="t-assignees" multiple size={4} className="field-input"
           value={assignees.map(String)}
@@ -115,7 +122,7 @@ function TaskForm({ onDone }: { onDone: () => void }) {
         >
           {employees.data?.content.map((emp) => (
             <option key={emp.id} value={emp.id}>
-              {emp.lastName}, {emp.firstName} · {emp.position}
+              {emp.lastName}, {emp.firstName} · {tLabel('employeePosition', emp.position)}
             </option>
           ))}
         </select>
@@ -124,9 +131,9 @@ function TaskForm({ onDone }: { onDone: () => void }) {
       {create.error && <p role="alert" className="field-error">{problemMessage(create.error)}</p>}
 
       <div className="flex justify-end gap-2">
-        <button type="button" className="btn-ghost" onClick={onDone}>Cerrar</button>
+        <button type="button" className="btn-ghost" onClick={onDone}>{t('common.close')}</button>
         <button type="submit" className="btn-primary" disabled={create.isPending || hotelId === ''}>
-          {create.isPending ? 'Creando…' : 'Crear tarea'}
+          {create.isPending ? t('admin.tasks.creating') : t('admin.tasks.create')}
         </button>
       </div>
     </form>
@@ -134,6 +141,8 @@ function TaskForm({ onDone }: { onDone: () => void }) {
 }
 
 function TaskCard({ task, onMove }: { task: TaskDto; onMove: (status: TaskStatus) => void }) {
+  const { t } = useTranslation()
+  const { tLabel } = useLabels()
   return (
     <article className="card-tile p-4">
       <div className="flex items-start justify-between gap-2">
@@ -141,9 +150,9 @@ function TaskCard({ task, onMove }: { task: TaskDto; onMove: (status: TaskStatus
         <PriorityBadge priority={task.priority} />
       </div>
       <p className="mt-1 text-xs text-teal-800">
-        {TASK_TYPE_LABEL[task.type]} · {task.hotelName}
-        {task.roomNumber && ` · hab. ${task.roomNumber}`}
-        {task.dueDate && ` · vence ${date(task.dueDate)}`}
+        {tLabel('taskType', task.type)} · {task.hotelName}
+        {task.roomNumber && ` · ${t('admin.bookings.roomShort', { n: task.roomNumber })}`}
+        {task.dueDate && ` · ${t('admin.tasks.due', { date: date(task.dueDate) })}`}
       </p>
       {task.assignees.length > 0 && (
         <p className="mt-1 text-xs text-teal-800">
@@ -153,17 +162,17 @@ function TaskCard({ task, onMove }: { task: TaskDto; onMove: (status: TaskStatus
       <div className="mt-3 flex gap-1.5">
         {task.status === 'PENDING' && (
           <button className="btn-primary px-2.5 py-1 text-xs" onClick={() => onMove('IN_PROGRESS')}>
-            Empezar
+            {t('admin.tasks.start')}
           </button>
         )}
         {task.status === 'IN_PROGRESS' && (
           <button className="btn-primary px-2.5 py-1 text-xs" onClick={() => onMove('DONE')}>
-            Completar
+            {t('admin.tasks.complete')}
           </button>
         )}
         {task.status !== 'DONE' && (
           <button className="btn-danger px-2.5 py-1 text-xs" onClick={() => onMove('CANCELLED')}>
-            Cancelar
+            {t('admin.tasks.cancel')}
           </button>
         )}
       </div>
@@ -172,6 +181,8 @@ function TaskCard({ task, onMove }: { task: TaskDto; onMove: (status: TaskStatus
 }
 
 export default function TasksPage() {
+  const { t } = useTranslation()
+  const { tLabel } = useLabels()
   const [creating, setCreating] = useState(false)
   const queryClient = useQueryClient()
 
@@ -195,11 +206,11 @@ export default function TasksPage() {
   return (
     <>
       <PageHeader
-        title="Tareas"
-        subtitle="Limpieza y mantenimiento — el check-out crea la limpieza automáticamente"
+        title={t('admin.tasks.title')}
+        subtitle={t('admin.tasks.subtitle')}
         actions={
           <button className="btn-gold" onClick={() => setCreating(true)}>
-            + Nueva tarea
+            {t('admin.tasks.new')}
           </button>
         }
       />
@@ -208,15 +219,15 @@ export default function TasksPage() {
 
       {data && data.content.length === 0 ? (
         <EmptyState
-          title="Sin tareas"
-          hint="Crea una tarea o haz un check-out: la limpieza de la habitación aparecerá sola."
+          title={t('admin.tasks.emptyTitle')}
+          hint={t('admin.tasks.emptyHint')}
         />
       ) : (
         <div className="grid gap-4 lg:grid-cols-3">
           {COLUMNS.map((status) => (
-            <section key={status} aria-label={TASK_STATUS_LABEL[status]}>
+            <section key={status} aria-label={tLabel('taskStatus', status)}>
               <h2 className="mb-3 text-xs font-semibold tracking-wide text-teal-800 uppercase">
-                {TASK_STATUS_LABEL[status]} · {byStatus(status).length}
+                {tLabel('taskStatus', status)} · {byStatus(status).length}
               </h2>
               <div className="space-y-3">
                 {byStatus(status).map((task) => (
@@ -228,7 +239,7 @@ export default function TasksPage() {
                 ))}
                 {byStatus(status).length === 0 && (
                   <p className="rounded-(--radius-tile) border border-dashed border-glaze-200 px-4 py-6 text-center text-xs text-teal-800">
-                    Nada aquí
+                    {t('admin.tasks.emptyColumn')}
                   </p>
                 )}
               </div>
@@ -237,7 +248,7 @@ export default function TasksPage() {
         </div>
       )}
 
-      <Modal open={creating} title="Nueva tarea" onClose={() => setCreating(false)} wide>
+      <Modal open={creating} title={t('admin.tasks.new')} onClose={() => setCreating(false)} wide>
         <TaskForm onDone={() => setCreating(false)} />
       </Modal>
     </>

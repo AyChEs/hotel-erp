@@ -1,8 +1,40 @@
+import { useTranslation } from 'react-i18next'
 import type {
   BoardType, BookingStatus, ClientType, EmployeePosition, EmployeeStatus,
   InvoiceStatus, PaymentMethod, RoomStatus, RoomType, TaskPriority, TaskStatus, TaskType,
 } from '../api/types'
 
+/**
+ * Enum labels — i18n-aware. The translation keys live in labels.json
+ * (es + en) so the same value is rendered in whichever language the
+ * visitor picked.
+ *
+ * Usage: `const { tLabel } = useLabels(); tLabel('bookingStatus', 'CONFIRMED')`
+ *   → "Confirmada" (ES) or "Confirmed" (EN).
+ */
+export type LabelGroup =
+  | 'boardType'
+  | 'bookingStatus'
+  | 'roomType'
+  | 'roomStatus'
+  | 'invoiceStatus'
+  | 'paymentMethod'
+  | 'taskStatus'
+  | 'taskType'
+  | 'taskPriority'
+  | 'clientType'
+  | 'employeePosition'
+  | 'employeeStatus'
+
+export function useLabels() {
+  const { t } = useTranslation()
+  const tLabel = (group: LabelGroup, value: string): string =>
+    t(`labels.${group}.${value}`)
+  return { tLabel }
+}
+
+// Backwards-compatible static Spanish maps — kept for any non-hook usage.
+// Components should prefer the `useLabels` hook.
 export const BOARD_LABEL: Record<BoardType, string> = {
   ROOM_ONLY: 'Solo alojamiento',
   BED_AND_BREAKFAST: 'Alojamiento y desayuno',

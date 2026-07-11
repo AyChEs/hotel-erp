@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   open: boolean
@@ -11,6 +12,7 @@ interface Props {
 /** Native <dialog>: focus trap, Esc-to-close and backdrop for free. */
 export function Modal({ open, title, onClose, children, wide }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     const dialog = ref.current
@@ -34,7 +36,7 @@ export function Modal({ open, title, onClose, children, wide }: Props) {
           <h2 className="text-lg font-semibold text-teal-900">{title}</h2>
           <button
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('common.close')}
             className="rounded-(--radius-tile) px-2 py-1 text-teal-800 transition-colors duration-150 hover:bg-glaze-100"
           >
             ✕

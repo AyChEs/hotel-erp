@@ -3,24 +3,26 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { meApi } from '../../api/endpoints'
 import { ErrorNote, ListSkeleton } from '../../components/ui/Feedback'
 import { problemMessage } from '../../api/client'
-import { CLIENT_TYPE_LABEL } from '../../lib/labels'
-
-const schema = z.object({
-  firstName: z.string().min(1, 'Obligatorio').max(80),
-  lastName: z.string().min(1, 'Obligatorio').max(80),
-  birthDate: z.string().optional(),
-  phone: z.string().max(40).optional(),
-  address: z.string().max(200).optional(),
-})
-
-type FormValues = z.infer<typeof schema>
+import { useLabels } from '../../lib/labels'
 
 export default function ProfilePage() {
+  const { t } = useTranslation()
+  const { tLabel } = useLabels()
   const queryClient = useQueryClient()
   const [saved, setSaved] = useState(false)
+
+  const schema = z.object({
+    firstName: z.string().min(1, t('auth.validation.firstNameMin')).max(80),
+    lastName: z.string().min(1, t('auth.validation.lastNameMin')).max(80),
+    birthDate: z.string().optional(),
+    phone: z.string().max(40).optional(),
+    address: z.string().max(200).optional(),
+  })
+  type FormValues = z.infer<typeof schema>
 
   const { data: profile, isPending, error } = useQuery({
     queryKey: ['me', 'profile'],
@@ -69,14 +71,14 @@ export default function ProfilePage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="firstName" className="field-label">
-              Nombre
+              {t('auth.register.firstName')}
             </label>
             <input id="firstName" className="field-input" {...register('firstName')} />
             {errors.firstName && <p className="field-error">{errors.firstName.message}</p>}
           </div>
           <div>
             <label htmlFor="lastName" className="field-label">
-              Apellidos
+              {t('auth.register.lastName')}
             </label>
             <input id="lastName" className="field-input" {...register('lastName')} />
             {errors.lastName && <p className="field-error">{errors.lastName.message}</p>}
@@ -86,13 +88,13 @@ export default function ProfilePage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="birthDate" className="field-label">
-              Fecha de nacimiento
+              {t('account.profile.birthDate')}
             </label>
             <input id="birthDate" type="date" className="field-input" {...register('birthDate')} />
           </div>
           <div>
             <label htmlFor="phone" className="field-label">
-              Teléfono
+              {t('auth.register.phone')}
             </label>
             <input id="phone" type="tel" className="field-input" {...register('phone')} />
           </div>
@@ -100,19 +102,19 @@ export default function ProfilePage() {
 
         <div>
           <label htmlFor="address" className="field-label">
-            Dirección
+            {t('account.profile.address')}
           </label>
           <input id="address" className="field-input" {...register('address')} />
         </div>
 
         <div className="rounded-(--radius-tile) bg-glaze-100 px-4 py-3 text-sm text-teal-800">
           <p>
-            <span className="font-medium">Documento:</span> {profile?.documentId} ·{' '}
-            <span className="font-medium">Tipo:</span>{' '}
-            {profile && CLIENT_TYPE_LABEL[profile.clientType]}
+            <span className="font-medium">{t('auth.register.documentId')}:</span> {profile?.documentId} ·{' '}
+            <span className="font-medium">{t('account.profile.type')}:</span>{' '}
+            {profile && tLabel('clientType', profile.clientType)}
           </p>
           <p className="mt-1 text-xs">
-            El documento de identidad solo puede modificarlo la recepción del hotel.
+            {t('account.profile.documentHint')}
           </p>
         </div>
 
@@ -123,12 +125,12 @@ export default function ProfilePage() {
         )}
         {saved && (
           <p role="status" className="text-sm font-medium text-teal-600">
-            Perfil guardado.
+            {t('account.profile.saved')}
           </p>
         )}
 
         <button type="submit" className="btn-primary" disabled={isSubmitting || save.isPending}>
-          {save.isPending ? 'Guardando…' : 'Guardar cambios'}
+          {save.isPending ? t('account.profile.saving') : t('common.save')}
         </button>
       </form>
     </div>

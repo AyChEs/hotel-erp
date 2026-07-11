@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { clientApi } from '../../api/endpoints'
 import type { ClientDto, ClientType } from '../../api/types'
 import { problemMessage } from '../../api/client'
@@ -9,9 +10,11 @@ import { PageHeader } from '../../components/ui/PageHeader'
 import { ErrorNote } from '../../components/ui/Feedback'
 import { useAuth } from '../../auth/AuthContext'
 import { useCrud } from '../../hooks/useCrud'
-import { CLIENT_TYPE_LABEL } from '../../lib/labels'
+import { useLabels } from '../../lib/labels'
 
 export default function ClientsPage() {
+  const { t } = useTranslation()
+  const { tLabel } = useLabels()
   const [page, setPage] = useState(0)
   const [search, setSearch] = useState('')
   const [editing, setEditing] = useState<ClientDto | null | 'new'>(null)
@@ -27,38 +30,38 @@ export default function ClientsPage() {
 
   const columns: Column<ClientDto>[] = [
     {
-      header: 'Cliente',
+      header: t('admin.clients.name'),
       cell: (c) => (
         <div>
           <p className="font-medium text-teal-950">{c.lastName}, {c.firstName}</p>
-          <p className="text-xs text-teal-800">{c.email ?? 'sin cuenta online'}</p>
+          <p className="text-xs text-teal-800">{c.email ?? t('admin.clients.noAccount')}</p>
         </div>
       ),
     },
-    { header: 'Documento', cell: (c) => c.documentId },
-    { header: 'Teléfono', cell: (c) => c.phone ?? '—' },
+    { header: t('auth.register.documentId'), cell: (c) => c.documentId },
+    { header: t('auth.register.phone'), cell: (c) => c.phone ?? '—' },
     {
-      header: 'Tipo',
+      header: t('admin.clients.type'),
       cell: (c) => (
         <span className={`badge ${c.clientType === 'VIP' ? 'bg-gold-100 text-gold-600' : 'bg-glaze-100 text-teal-800'}`}>
-          {CLIENT_TYPE_LABEL[c.clientType]}
+          {tLabel('clientType', c.clientType)}
         </span>
       ),
     },
     {
-      header: 'Acciones',
+      header: t('common.actions'),
       align: 'right',
       cell: (c) => (
         <div className="flex justify-end gap-1.5">
-          <button className="btn-ghost px-2.5 py-1 text-xs" onClick={() => setEditing(c)}>Editar</button>
+          <button className="btn-ghost px-2.5 py-1 text-xs" onClick={() => setEditing(c)}>{t('common.edit')}</button>
           {hasRole('ADMIN', 'MANAGER') && (
             <button
               className="btn-danger px-2.5 py-1 text-xs"
               onClick={() => {
-                if (window.confirm(`¿Eliminar a ${c.firstName} ${c.lastName}?`)) remove.mutate(c.id)
+                if (window.confirm(t('admin.clients.deleteConfirm', { name: `${c.firstName} ${c.lastName}` }))) remove.mutate(c.id)
               }}
             >
-              Eliminar
+              {t('common.delete')}
             </button>
           )}
         </div>
@@ -69,15 +72,15 @@ export default function ClientsPage() {
   return (
     <>
       <PageHeader
-        title="Clientes"
-        subtitle="Huéspedes registrados y clientes de mostrador"
-        actions={<button className="btn-gold" onClick={() => setEditing('new')}>+ Nuevo cliente</button>}
+        title={t('admin.clients.title')}
+        subtitle={t('admin.clients.subtitle')}
+        actions={<button className="btn-gold" onClick={() => setEditing('new')}>{t('admin.clients.new')}</button>}
       />
 
       <div className="mb-4">
         <input
-          type="search" className="field-input max-w-sm" placeholder="Buscar por nombre o documento…"
-          aria-label="Buscar clientes"
+          type="search" className="field-input max-w-sm" placeholder={t('admin.bookings.clientSearchPlaceholder')}
+          aria-label={t('admin.clients.searchAria')}
           value={search} onChange={(e) => { setSearch(e.target.value); setPage(0) }}
         />
       </div>
@@ -87,14 +90,14 @@ export default function ClientsPage() {
       <DataTable
         columns={columns} data={data} isPending={isPending} error={error}
         page={page} onPageChange={setPage}
-        emptyTitle="Sin clientes con esta búsqueda"
-        emptyHint="Los clientes que se registran online aparecen aquí automáticamente."
+        emptyTitle={t('admin.clients.emptyTitle')}
+        emptyHint={t('admin.clients.emptyHint')}
         rowKey={(c) => c.id}
       />
 
       <Modal
         open={editing !== null}
-        title={current ? `Editar ${current.firstName} ${current.lastName}` : 'Nuevo cliente (mostrador)'}
+        title={current ? t('admin.clients.edit', { name: `${current.firstName} ${current.lastName}` }) : t('admin.clients.create')}
         onClose={() => setEditing(null)}
       >
         <form
@@ -116,45 +119,47 @@ export default function ClientsPage() {
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="field-label" htmlFor="cl-first">Nombre</label>
+              <label className="field-label" htmlFor="cl-first">{t('auth.register.firstName')}</label>
               <input id="cl-first" name="firstName" className="field-input" required maxLength={80} defaultValue={current?.firstName} />
             </div>
             <div>
-              <label className="field-label" htmlFor="cl-last">Apellidos</label>
+              <label className="field-label" htmlFor="cl-last">{t('auth.register.lastName')}</label>
               <input id="cl-last" name="lastName" className="field-input" required maxLength={80} defaultValue={current?.lastName} />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="field-label" htmlFor="cl-doc">Documento</label>
+              <label className="field-label" htmlFor="cl-doc">{t('auth.register.documentId')}</label>
               <input id="cl-doc" name="documentId" className="field-input" required maxLength={40} defaultValue={current?.documentId} />
             </div>
             <div>
-              <label className="field-label" htmlFor="cl-birth">Nacimiento</label>
+              <label className="field-label" htmlFor="cl-birth">{t('account.profile.birthDate')}</label>
               <input id="cl-birth" name="birthDate" type="date" className="field-input" defaultValue={current?.birthDate ?? ''} />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="field-label" htmlFor="cl-phone">Teléfono</label>
+              <label className="field-label" htmlFor="cl-phone">{t('auth.register.phone')}</label>
               <input id="cl-phone" name="phone" type="tel" className="field-input" maxLength={40} defaultValue={current?.phone ?? ''} />
             </div>
             <div>
-              <label className="field-label" htmlFor="cl-type">Tipo</label>
+              <label className="field-label" htmlFor="cl-type">{t('admin.clients.type')}</label>
               <select id="cl-type" name="clientType" className="field-input" defaultValue={current?.clientType ?? 'REGULAR'}>
-                {Object.entries(CLIENT_TYPE_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                {(['REGULAR','VIP'] as ClientType[]).map((v) => (
+                  <option key={v} value={v}>{tLabel('clientType', v)}</option>
+                ))}
               </select>
             </div>
           </div>
           <div>
-            <label className="field-label" htmlFor="cl-addr">Dirección</label>
+            <label className="field-label" htmlFor="cl-addr">{t('account.profile.address')}</label>
             <input id="cl-addr" name="address" className="field-input" maxLength={200} defaultValue={current?.address ?? ''} />
           </div>
           {save.error && <p role="alert" className="field-error">{problemMessage(save.error)}</p>}
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn-ghost" onClick={() => setEditing(null)}>Cerrar</button>
+            <button type="button" className="btn-ghost" onClick={() => setEditing(null)}>{t('common.close')}</button>
             <button type="submit" className="btn-primary" disabled={save.isPending}>
-              {save.isPending ? 'Guardando…' : 'Guardar'}
+              {save.isPending ? t('common.loading') : t('common.save')}
             </button>
           </div>
         </form>

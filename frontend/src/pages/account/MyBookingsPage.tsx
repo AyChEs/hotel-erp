@@ -1,12 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { meApi } from '../../api/endpoints'
 import { BookingBadge } from '../../components/ui/StatusBadge'
 import { EmptyState, ErrorNote, ListSkeleton } from '../../components/ui/Feedback'
 import { date, money } from '../../lib/format'
-import { BOARD_LABEL } from '../../lib/labels'
+import { useLabels } from '../../lib/labels'
 
 export default function MyBookingsPage() {
+  const { t } = useTranslation()
+  const { tLabel } = useLabels()
   const queryClient = useQueryClient()
   const { data, isPending, error } = useQuery({
     queryKey: ['me', 'bookings'],
@@ -23,8 +26,8 @@ export default function MyBookingsPage() {
   if (!data || data.content.length === 0) {
     return (
       <EmptyState
-        title="Todavía no tienes reservas"
-        hint="Busca disponibilidad en cualquiera de nuestros hoteles y tu reserva aparecerá aquí."
+        title={t('account.myBookings.empty')}
+        hint={`${t('account.myBookings.empty')} — ${t('account.myBookings.emptyLink')}`}
       />
     )
   }
@@ -45,9 +48,10 @@ export default function MyBookingsPage() {
                 <BookingBadge status={booking.status} />
               </div>
               <p className="mt-1 text-sm text-teal-800">
-                {date(booking.checkInDate)} → {date(booking.checkOutDate)} · hab.{' '}
-                {booking.roomNumber} · {booking.guests} huésped
-                {booking.guests === 1 ? '' : 'es'} · {BOARD_LABEL[booking.boardType]}
+                {date(booking.checkInDate)} → {date(booking.checkOutDate)} ·{' '}
+                {t('account.myBookings.room', { n: booking.roomNumber })} ·{' '}
+                {t('public.hotelDetail.guests', { count: booking.guests })} ·{' '}
+                {tLabel('boardType', booking.boardType)}
               </p>
               <p className="mt-0.5 text-xs text-teal-800/80">
                 {booking.code}
@@ -58,7 +62,7 @@ export default function MyBookingsPage() {
                       to="/account/invoices"
                       className="text-teal-600 underline hover:text-teal-500"
                     >
-                      factura disponible
+                      {t('account.myBookings.invoiceAvailable')}
                     </Link>
                   </>
                 )}
@@ -71,12 +75,12 @@ export default function MyBookingsPage() {
                   className="btn-danger"
                   disabled={cancel.isPending}
                   onClick={() => {
-                    if (window.confirm(`¿Cancelar la reserva ${booking.code}?`)) {
+                    if (window.confirm(t('account.myBookings.cancelConfirmWithCode', { code: booking.code }))) {
                       cancel.mutate(booking.id)
                     }
                   }}
                 >
-                  Cancelar
+                  {cancel.isPending ? t('account.myBookings.cancelling') : t('account.myBookings.cancel')}
                 </button>
               )}
             </div>

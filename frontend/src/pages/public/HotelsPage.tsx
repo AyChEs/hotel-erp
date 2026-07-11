@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { hotelApi } from '../../api/endpoints'
 import { EmptyState, ErrorNote, ListSkeleton } from '../../components/ui/Feedback'
 
 export default function HotelsPage() {
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const [city, setCity] = useState('')
 
@@ -21,23 +23,23 @@ export default function HotelsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="font-display mb-1 text-3xl text-teal-900">Hoteles</h1>
+      <h1 className="font-display mb-1 text-3xl text-teal-900">{t('public.hotels.title')}</h1>
       <div className="divider-arabesque mb-8 max-w-55 text-sm">◆</div>
 
       <div className="mb-6 flex flex-wrap gap-3">
         <input
           type="search"
           className="field-input max-w-xs"
-          placeholder="Buscar por nombre…"
-          aria-label="Buscar hotel por nombre"
+          placeholder={t('public.hotels.searchPlaceholder')}
+          aria-label={t('public.hotels.searchAria')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <input
           type="search"
           className="field-input max-w-xs"
-          placeholder="Ciudad (p. ej. Granada)"
-          aria-label="Filtrar por ciudad"
+          placeholder={t('public.hotels.cityPlaceholder')}
+          aria-label={t('public.hotels.cityAria')}
           value={city}
           onChange={(e) => setCity(e.target.value)}
         />
@@ -48,8 +50,8 @@ export default function HotelsPage() {
         <ListSkeleton rows={3} />
       ) : data && data.content.length === 0 ? (
         <EmptyState
-          title="Sin resultados"
-          hint="Prueba con otro nombre u otra ciudad; el buscador no distingue mayúsculas."
+          title={t('public.hotels.emptyTitle')}
+          hint={t('public.hotels.emptyHint')}
         />
       ) : (
         <div className="space-y-4">
@@ -63,7 +65,7 @@ export default function HotelsPage() {
                 {hotel.imageUrl && (
                   <img
                     src={hotel.imageUrl}
-                    alt={`Fachada de ${hotel.name}`}
+                    alt={hotel.name}
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:group-hover:scale-100"
                   />
@@ -84,7 +86,7 @@ export default function HotelsPage() {
                 </p>
               </div>
               <span className="btn-ghost shrink-0 self-start sm:self-center">
-                Ver habitaciones
+                {t('public.hotels.viewRooms')}
               </span>
             </Link>
           ))}

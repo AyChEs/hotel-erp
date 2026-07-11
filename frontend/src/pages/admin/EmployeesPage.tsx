@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { employeeApi, hotelApi } from '../../api/endpoints'
 import type { EmployeeDto, EmployeePosition, EmployeeStatus } from '../../api/types'
 import { problemMessage } from '../../api/client'
@@ -10,7 +11,7 @@ import { ErrorNote } from '../../components/ui/Feedback'
 import { useAuth } from '../../auth/AuthContext'
 import { useCrud } from '../../hooks/useCrud'
 import { money, todayIso } from '../../lib/format'
-import { EMPLOYEE_STATUS_LABEL, POSITION_LABEL } from '../../lib/labels'
+import { useLabels } from '../../lib/labels'
 
 const STATUS_TONE: Record<EmployeeStatus, string> = {
   ACTIVE: 'bg-teal-100 text-teal-800',
@@ -19,6 +20,8 @@ const STATUS_TONE: Record<EmployeeStatus, string> = {
 }
 
 export default function EmployeesPage() {
+  const { t } = useTranslation()
+  const { tLabel } = useLabels()
   const [page, setPage] = useState(0)
   const [editing, setEditing] = useState<EmployeeDto | null | 'new'>(null)
   const { hasRole } = useAuth()
@@ -35,7 +38,7 @@ export default function EmployeesPage() {
 
   const columns: Column<EmployeeDto>[] = [
     {
-      header: 'Empleado',
+      header: t('admin.employees.name'),
       cell: (e) => (
         <div>
           <p className="font-medium text-teal-950">{e.lastName}, {e.firstName}</p>
@@ -43,37 +46,37 @@ export default function EmployeesPage() {
         </div>
       ),
     },
-    { header: 'Puesto', cell: (e) => POSITION_LABEL[e.position] },
-    { header: 'Hotel', cell: (e) => e.hotelName ?? '—' },
+    { header: t('admin.employees.position'), cell: (e) => tLabel('employeePosition', e.position) },
+    { header: t('admin.rooms.hotel'), cell: (e) => e.hotelName ?? '—' },
     {
-      header: 'Estado',
-      cell: (e) => <span className={`badge ${STATUS_TONE[e.status]}`}>{EMPLOYEE_STATUS_LABEL[e.status]}</span>,
+      header: t('admin.employees.status'),
+      cell: (e) => <span className={`badge ${STATUS_TONE[e.status]}`}>{tLabel('employeeStatus', e.status)}</span>,
     },
     ...(isAdmin
       ? [{
-          header: 'Salario bruto',
+          header: t('admin.employees.grossSalary'),
           align: 'right' as const,
           cell: (e: EmployeeDto) => (e.grossSalary != null ? money(e.grossSalary) : '—'),
         }]
       : []),
     {
-      header: 'Acciones',
+      header: t('common.actions'),
       align: 'right',
       cell: (e) =>
         isAdmin ? (
           <div className="flex justify-end gap-1.5">
-            <button className="btn-ghost px-2.5 py-1 text-xs" onClick={() => setEditing(e)}>Editar</button>
+            <button className="btn-ghost px-2.5 py-1 text-xs" onClick={() => setEditing(e)}>{t('common.edit')}</button>
             <button
               className="btn-danger px-2.5 py-1 text-xs"
               onClick={() => {
-                if (window.confirm(`¿Eliminar a ${e.firstName} ${e.lastName}?`)) remove.mutate(e.id)
+                if (window.confirm(t('admin.employees.deleteConfirm', { name: `${e.firstName} ${e.lastName}` }))) remove.mutate(e.id)
               }}
             >
-              Eliminar
+              {t('common.delete')}
             </button>
           </div>
         ) : (
-          <span className="text-xs text-teal-800">solo lectura</span>
+          <span className="text-xs text-teal-800">{t('admin.employees.readOnly')}</span>
         ),
     },
   ]
@@ -81,9 +84,9 @@ export default function EmployeesPage() {
   return (
     <>
       <PageHeader
-        title="Empleados"
-        subtitle={isAdmin ? 'Plantilla completa con salarios' : 'Vista de solo lectura para dirección'}
-        actions={isAdmin && <button className="btn-gold" onClick={() => setEditing('new')}>+ Nuevo empleado</button>}
+        title={t('admin.employees.title')}
+        subtitle={isAdmin ? t('admin.employees.subtitleAdmin') : t('admin.employees.subtitleReadonly')}
+        actions={isAdmin && <button className="btn-gold" onClick={() => setEditing('new')}>{t('admin.employees.new')}</button>}
       />
 
       {remove.error && <div className="mb-4"><ErrorNote error={remove.error} /></div>}
@@ -91,12 +94,12 @@ export default function EmployeesPage() {
       <DataTable
         columns={columns} data={data} isPending={isPending} error={error}
         page={page} onPageChange={setPage}
-        emptyTitle="Sin empleados" rowKey={(e) => e.id}
+        emptyTitle={t('admin.employees.emptyTitle')} rowKey={(e) => e.id}
       />
 
       <Modal
         open={editing !== null}
-        title={current ? `Editar ${current.firstName} ${current.lastName}` : 'Nuevo empleado'}
+        title={current ? t('admin.employees.edit', { name: `${current.firstName} ${current.lastName}` }) : t('admin.employees.create')}
         onClose={() => setEditing(null)}
         wide
       >
@@ -123,64 +126,68 @@ export default function EmployeesPage() {
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="field-label" htmlFor="e-first">Nombre</label>
+              <label className="field-label" htmlFor="e-first">{t('auth.register.firstName')}</label>
               <input id="e-first" name="firstName" className="field-input" required maxLength={80} defaultValue={current?.firstName} />
             </div>
             <div>
-              <label className="field-label" htmlFor="e-last">Apellidos</label>
+              <label className="field-label" htmlFor="e-last">{t('auth.register.lastName')}</label>
               <input id="e-last" name="lastName" className="field-input" required maxLength={80} defaultValue={current?.lastName} />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
-              <label className="field-label" htmlFor="e-doc">Documento</label>
+              <label className="field-label" htmlFor="e-doc">{t('auth.register.documentId')}</label>
               <input id="e-doc" name="documentId" className="field-input" required maxLength={40} defaultValue={current?.documentId} />
             </div>
             <div>
-              <label className="field-label" htmlFor="e-birth">Nacimiento</label>
+              <label className="field-label" htmlFor="e-birth">{t('account.profile.birthDate')}</label>
               <input id="e-birth" name="birthDate" type="date" className="field-input" defaultValue={current?.birthDate ?? ''} />
             </div>
             <div>
-              <label className="field-label" htmlFor="e-phone">Teléfono</label>
+              <label className="field-label" htmlFor="e-phone">{t('auth.register.phone')}</label>
               <input id="e-phone" name="phone" type="tel" className="field-input" maxLength={40} defaultValue={current?.phone ?? ''} />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
-              <label className="field-label" htmlFor="e-pos">Puesto</label>
+              <label className="field-label" htmlFor="e-pos">{t('admin.employees.position')}</label>
               <select id="e-pos" name="position" className="field-input" defaultValue={current?.position ?? 'RECEPTIONIST'}>
-                {Object.entries(POSITION_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                {(['MANAGER','RECEPTIONIST','HOUSEKEEPER','MAINTENANCE'] as EmployeePosition[]).map((v) => (
+                  <option key={v} value={v}>{tLabel('employeePosition', v)}</option>
+                ))}
               </select>
             </div>
             <div>
-              <label className="field-label" htmlFor="e-status">Estado</label>
+              <label className="field-label" htmlFor="e-status">{t('admin.employees.status')}</label>
               <select id="e-status" name="status" className="field-input" defaultValue={current?.status ?? 'ACTIVE'}>
-                {Object.entries(EMPLOYEE_STATUS_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                {(['ACTIVE','ON_LEAVE','TERMINATED'] as EmployeeStatus[]).map((v) => (
+                  <option key={v} value={v}>{tLabel('employeeStatus', v)}</option>
+                ))}
               </select>
             </div>
             <div>
               <label className="field-label" htmlFor="e-hotel">Hotel</label>
               <select id="e-hotel" name="hotelId" className="field-input" defaultValue={current?.hotelId ?? ''}>
-                <option value="">— Sin asignar —</option>
+                <option value="">— {t('admin.employees.unassigned')} —</option>
                 {hotels.data?.content.map((h) => <option key={h.id} value={h.id}>{h.name}</option>)}
               </select>
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="field-label" htmlFor="e-hired">Fecha de alta</label>
+              <label className="field-label" htmlFor="e-hired">{t('admin.employees.hireDate')}</label>
               <input id="e-hired" name="hiredAt" type="date" className="field-input" required defaultValue={current?.hiredAt ?? todayIso()} />
             </div>
             <div>
-              <label className="field-label" htmlFor="e-salary">Salario bruto anual (€)</label>
+              <label className="field-label" htmlFor="e-salary">{t('admin.employees.grossSalaryField')}</label>
               <input id="e-salary" name="grossSalary" type="number" step="0.01" min={0} className="field-input" defaultValue={current?.grossSalary ?? ''} />
             </div>
           </div>
           {save.error && <p role="alert" className="field-error">{problemMessage(save.error)}</p>}
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn-ghost" onClick={() => setEditing(null)}>Cerrar</button>
+            <button type="button" className="btn-ghost" onClick={() => setEditing(null)}>{t('common.close')}</button>
             <button type="submit" className="btn-primary" disabled={save.isPending}>
-              {save.isPending ? 'Guardando…' : 'Guardar'}
+              {save.isPending ? t('common.loading') : t('common.save')}
             </button>
           </div>
         </form>

@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { bookingApi, hotelApi, roomApi } from '../../api/endpoints'
 import type { BookingStatus } from '../../api/types'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { ErrorNote, ListSkeleton } from '../../components/ui/Feedback'
 import { plusDaysIso, todayIso } from '../../lib/format'
+import { useLabels } from '../../lib/labels'
 
 const DAYS_SHOWN = 14
 
@@ -17,6 +19,9 @@ const CELL_TONE: Record<BookingStatus, string> = {
 }
 
 export default function CalendarPage() {
+  const { t, i18n } = useTranslation()
+  const { tLabel } = useLabels()
+  const locale = i18n.resolvedLanguage?.slice(0, 2) || 'es'
   const [hotelId, setHotelId] = useState<number>(1)
   const [start, setStart] = useState(todayIso())
 
@@ -46,11 +51,16 @@ export default function CalendarPage() {
         b.checkOutDate > day,
     )
 
+  const formatDayHeader = (d: string) => {
+    const date = new Date(`${d}T00:00:00`)
+    return date.toLocaleDateString(locale === 'es' ? 'es-ES' : 'en-GB', { day: '2-digit', month: '2-digit' })
+  }
+
   return (
     <>
       <PageHeader
-        title="Calendario de ocupación"
-        subtitle={`${DAYS_SHOWN} días · habitaciones × fechas`}
+        title={t('admin.calendar.title')}
+        subtitle={t('admin.calendar.subtitle', { days: DAYS_SHOWN })}
         actions={
           <>
             <select
@@ -67,7 +77,7 @@ export default function CalendarPage() {
               type="date"
               className="field-input w-auto"
               value={start}
-              aria-label="Fecha inicial"
+              aria-label={t('admin.calendar.startDate')}
               onChange={(e) => setStart(e.target.value)}
             />
           </>
@@ -76,10 +86,11 @@ export default function CalendarPage() {
 
       {/* Leyenda: color + texto, nunca solo color */}
       <div className="mb-4 flex flex-wrap gap-4 text-xs text-teal-800">
-        <span className="flex items-center gap-1.5"><i className="h-3 w-3 rounded-[3px] bg-gold-300" /> Pendiente</span>
-        <span className="flex items-center gap-1.5"><i className="h-3 w-3 rounded-[3px] bg-teal-500" /> Confirmada</span>
-        <span className="flex items-center gap-1.5"><i className="h-3 w-3 rounded-[3px] bg-teal-800" /> Check-in</span>
-        <span className="flex items-center gap-1.5"><i className="h-3 w-3 rounded-[3px] bg-glaze-200" /> Check-out</span>
+        {(['PENDING','CONFIRMED','CHECKED_IN','CHECKED_OUT'] as BookingStatus[]).map((s) => (
+          <span key={s} className="flex items-center gap-1.5">
+            <i className={`h-3 w-3 rounded-[3px] ${CELL_TONE[s]}`} /> {tLabel('bookingStatus', s)}
+          </span>
+        ))}
       </div>
 
       {rooms.isPending || bookings.isPending ? (
@@ -90,7 +101,7 @@ export default function CalendarPage() {
             <thead>
               <tr>
                 <th className="sticky left-0 bg-white px-3 py-2 text-left font-semibold text-teal-800">
-                  Habitación
+                  {t('admin.rooms.title').slice(0, 5)}
                 </th>
                 {days.map((d) => (
                   <th
@@ -99,7 +110,7 @@ export default function CalendarPage() {
                       d === todayIso() ? 'text-gold-600' : 'text-teal-800'
                     }`}
                   >
-                    {d.slice(8)}/{d.slice(5, 7)}
+                    {formatDayHeader(d)}
                   </th>
                 ))}
               </tr>
@@ -116,7 +127,7 @@ export default function CalendarPage() {
                       <td key={d} className="p-0.5">
                         <div
                           className={`h-6 rounded-[3px] ${b ? CELL_TONE[b.status] : 'bg-glaze-100/50'}`}
-                          title={b ? `${b.code} · ${b.clientFullName}` : `${room.number} libre ${d}`}
+                          title={b ? `${b.code} · ${b.clientFullName}` : `${room.number} · ${t('admin.calendar.free')} · ${d}`}
                         />
                       </td>
                     )

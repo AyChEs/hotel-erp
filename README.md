@@ -1,13 +1,17 @@
-# Hotel ERP
+# Zellige Hotels
 
-A hotel management platform I built end-to-end as a learning project:
-public site with browsing and booking, client self-service area, and a
-complete staff ERP (booking lifecycle, invoicing, housekeeping, dashboards).
+The platform running **Zellige Hotels** — a small chain with properties
+in Granada, Marrakech and Barcelona. I built it end-to-end as a learning
+project: public site with browsing and booking, client self-service area,
+and a complete staff ERP (booking lifecycle, invoicing, housekeeping,
+dashboards).
 
 It's a rewrite of a smaller classroom project — same idea, but rebuilt
 properly, with the engineering I wanted to learn: Spring Boot on the
 backend, React on the front, real auth, real database constraints, tests
 that touch a real Postgres, deployed for the cost of a domain name.
+
+**Live:** [hotel-erp-rho.vercel.app](https://hotel-erp-rho.vercel.app)
 
 ![Landing](docs/screenshots/landing.png)
 
@@ -86,7 +90,7 @@ frontend/  src/
 ├── auth/                            AuthContext, role-guarded routes
 ├── components/ui/                   DataTable, Modal, badges, feedback states
 ├── pages/{public,account,admin}     16 routes, lazy-loaded
-└── styles/theme.css                 tokens (see DESIGN.md)
+└── styles/theme.css                 tokens (see docs/DESIGN.md)
 ```
 
 Auth flow: access token in memory, refresh token rotated on every use.
@@ -125,8 +129,8 @@ A few things that genuinely surprised me while building this:
 
 ## Deployment
 
-See **[DEPLOYMENT.md](DEPLOYMENT.md)** for the step-by-step (Render + Neon
-+ Vercel + Brevo, all on free tiers).
+See **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** for the step-by-step
+(Render + Neon + Vercel + Brevo, all on free tiers).
 
 ## License
 

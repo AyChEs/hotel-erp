@@ -111,7 +111,7 @@ export default function HotelDetailPage() {
         {/* Availability controls */}
         <form
           onSubmit={updateSearch}
-          className="card-tile mb-8 grid gap-4 p-5 sm:grid-cols-[1fr_1fr_auto_1fr_auto]"
+          className="card-tile mb-8 grid gap-4 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-[1fr_1fr_auto_1fr_auto]"
         >
           <div>
             <label htmlFor="checkIn" className="field-label">
@@ -217,14 +217,14 @@ export default function HotelDetailPage() {
               return (
                 <article
                   key={room.id}
-                  className="card-tile flex flex-col gap-4 p-5 sm:flex-row sm:items-center"
+                  className="card-tile flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5"
                 >
                   {room.imageUrl && (
                     <img
                       src={room.imageUrl}
                       alt={`${t('public.hotelDetail.roomsTitle')} ${room.number}`}
                       loading="lazy"
-                      className="h-32 w-full shrink-0 rounded-(--radius-tile) object-cover sm:h-24 sm:w-40"
+                      className="h-40 w-full shrink-0 rounded-(--radius-tile) object-cover sm:h-24 sm:w-40"
                     />
                   )}
                   <div className="min-w-0 flex-1">
@@ -244,7 +244,7 @@ export default function HotelDetailPage() {
                         ` · ${t('public.hotelDetail.fullBoardSupplement', { price: money(room.fullBoardSupplement) })}`}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-4">
+                  <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end sm:gap-4">
                     <div className="text-right">
                       <p className="text-lg font-semibold text-teal-900">{money(total)}</p>
                       <p className="text-xs text-teal-800">{t('public.hotelDetail.total')}</p>

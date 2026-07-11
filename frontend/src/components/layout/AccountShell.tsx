@@ -10,7 +10,7 @@ const tab = ({ isActive }: { isActive: boolean }) =>
 export function AccountShell() {
   const { t } = useTranslation()
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:py-8">
       <h1 className="font-display mb-1 text-2xl text-teal-900">{t('public.nav.myAccount')}</h1>
       <div className="divider-arabesque mb-6 max-w-55 text-sm">◆</div>
       <nav aria-label={t('public.nav.myAccount')} className="mb-6 flex flex-wrap gap-2">

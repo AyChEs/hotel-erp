@@ -8,8 +8,6 @@ import { ErrorNote, ListSkeleton } from '../../components/ui/Feedback'
 import { plusDaysIso, todayIso } from '../../lib/format'
 import { useLabels } from '../../lib/labels'
 
-const DAYS_SHOWN = 14
-
 const CELL_TONE: Record<BookingStatus, string> = {
   PENDING: 'bg-gold-300',
   CONFIRMED: 'bg-teal-500',
@@ -24,11 +22,14 @@ export default function CalendarPage() {
   const locale = i18n.resolvedLanguage?.slice(0, 2) || 'es'
   const [hotelId, setHotelId] = useState<number>(1)
   const [start, setStart] = useState(todayIso())
+  const [daysToShow, setDaysToShow] = useState<7 | 14>(() =>
+    typeof window !== 'undefined' && window.innerWidth < 640 ? 7 : 14,
+  )
 
-  const days = Array.from({ length: DAYS_SHOWN }, (_, i) =>
+  const days = Array.from({ length: daysToShow }, (_, i) =>
     plusDaysIso(i, new Date(start + 'T00:00:00')),
   )
-  const end = plusDaysIso(DAYS_SHOWN, new Date(start + 'T00:00:00'))
+  const end = plusDaysIso(daysToShow, new Date(start + 'T00:00:00'))
 
   const hotels = useQuery({ queryKey: ['hotels', 'all'], queryFn: () => hotelApi.search({ size: 50 }) })
   const rooms = useQuery({
@@ -60,7 +61,7 @@ export default function CalendarPage() {
     <>
       <PageHeader
         title={t('admin.calendar.title')}
-        subtitle={t('admin.calendar.subtitle', { days: DAYS_SHOWN })}
+        subtitle={t('admin.calendar.subtitle', { days: daysToShow })}
         actions={
           <>
             <select
@@ -80,6 +81,20 @@ export default function CalendarPage() {
               aria-label={t('admin.calendar.startDate')}
               onChange={(e) => setStart(e.target.value)}
             />
+            <div className="flex items-center gap-1 rounded-full border border-glaze-200 bg-glaze-50 p-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setDaysToShow(7)}
+                aria-pressed={daysToShow === 7}
+                className={`rounded-full px-2.5 py-1 ${daysToShow === 7 ? 'bg-teal-800 text-glaze-50' : 'text-teal-800'}`}
+              >7d</button>
+              <button
+                type="button"
+                onClick={() => setDaysToShow(14)}
+                aria-pressed={daysToShow === 14}
+                className={`rounded-full px-2.5 py-1 ${daysToShow === 14 ? 'bg-teal-800 text-glaze-50' : 'text-teal-800'}`}
+              >14d</button>
+            </div>
           </>
         }
       />
@@ -97,16 +112,16 @@ export default function CalendarPage() {
         <ListSkeleton rows={5} />
       ) : (
         <div className="card-tile overflow-x-auto">
-          <table className="w-full border-collapse text-xs">
+          <table className="w-full min-w-[480px] border-collapse text-xs">
             <thead>
               <tr>
-                <th className="sticky left-0 bg-white px-3 py-2 text-left font-semibold text-teal-800">
+                <th className="sticky left-0 z-10 bg-white px-3 py-2 text-left font-semibold text-teal-800">
                   {t('admin.rooms.title').slice(0, 5)}
                 </th>
                 {days.map((d) => (
                   <th
                     key={d}
-                    className={`min-w-11 px-1 py-2 text-center font-medium ${
+                    className={`min-w-10 px-1 py-2 text-center font-medium ${
                       d === todayIso() ? 'text-gold-600' : 'text-teal-800'
                     }`}
                   >
@@ -118,7 +133,7 @@ export default function CalendarPage() {
             <tbody>
               {rooms.data?.content.map((room) => (
                 <tr key={room.id} className="border-t border-glaze-100">
-                  <th className="sticky left-0 bg-white px-3 py-1.5 text-left font-medium text-teal-950">
+                  <th className="sticky left-0 z-10 bg-white px-3 py-1.5 text-left font-medium text-teal-950">
                     {room.number}
                   </th>
                   {days.map((d) => {

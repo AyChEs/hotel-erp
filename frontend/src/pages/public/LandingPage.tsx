@@ -54,24 +54,24 @@ export default function LandingPage() {
           loading="eager"
         />
         <div className="bg-arabesque absolute inset-0 opacity-55" aria-hidden />
-        <div className="relative mx-auto max-w-6xl px-4 py-24 lg:py-32">
-          <motion.p {...rise(0)} className="mb-3 text-sm text-gold-300">
+        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:py-24 lg:py-32">
+          <motion.p {...rise(0)} className="mb-3 text-xs text-gold-300 sm:text-sm">
             {t('public.landing.kicker')}
           </motion.p>
           <motion.h1
             {...rise(0.08)}
-            className="font-display max-w-3xl text-4xl leading-tight text-white md:text-6xl"
+            className="font-display max-w-3xl text-3xl leading-tight text-white sm:text-4xl md:text-6xl"
           >
             {t('public.landing.title')}
           </motion.h1>
-          <motion.p {...rise(0.16)} className="mt-5 max-w-xl text-lg text-glaze-100/90">
+          <motion.p {...rise(0.16)} className="mt-5 max-w-xl text-base text-glaze-100/90 sm:text-lg">
             {t('public.landing.subtitle')}
           </motion.p>
 
           <motion.form
             {...rise(0.24)}
             onSubmit={searchFirstHotel}
-            className="card-tile-accent mt-10 grid max-w-3xl gap-4 p-5 sm:grid-cols-[1fr_1fr_auto_auto]"
+            className="card-tile-accent mt-10 grid max-w-3xl gap-4 p-4 sm:p-5 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto_auto]"
           >
             <div>
               <label htmlFor="checkIn" className="field-label">{t('public.landing.checkIn')}</label>
@@ -90,7 +90,7 @@ export default function LandingPage() {
             <div>
               <label htmlFor="guests" className="field-label">{t('public.landing.guests')}</label>
               <input
-                id="guests" type="number" min={1} max={10} className="field-input w-24"
+                id="guests" type="number" min={1} max={10} className="field-input sm:w-24"
                 value={guests} onChange={(e) => setGuests(Number(e.target.value))}
               />
             </div>

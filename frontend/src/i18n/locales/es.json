@@ -37,7 +37,8 @@
   },
   "dataTable": {
     "page": "Página {{page}} de {{total}} · {{count}} registros",
-    "ariaLabel": "Paginación"
+    "ariaLabel": "Paginación",
+    "scroll": "desliza para ver más"
   },
   "labels": {
     "boardType": {

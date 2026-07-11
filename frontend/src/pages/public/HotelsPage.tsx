@@ -59,9 +59,9 @@ export default function HotelsPage() {
             <Link
               key={hotel.id}
               to={`/hotels/${hotel.id}`}
-              className="card-tile group flex flex-col gap-4 p-5 transition-shadow duration-200 hover:shadow-md sm:flex-row sm:items-center"
+              className="card-tile group flex flex-col gap-4 p-4 transition-shadow duration-200 hover:shadow-md sm:flex-row sm:items-center sm:p-5"
             >
-              <div className="relative h-32 w-full shrink-0 overflow-hidden rounded-(--radius-tile) bg-teal-900 sm:h-24 sm:w-44">
+              <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-(--radius-tile) bg-teal-900 sm:h-24 sm:w-44">
                 {hotel.imageUrl && (
                   <img
                     src={hotel.imageUrl}
@@ -75,7 +75,7 @@ export default function HotelsPage() {
                 </span>
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="font-display text-xl text-teal-900 group-hover:text-teal-700">
+                <h2 className="font-display text-lg text-teal-900 group-hover:text-teal-700 sm:text-xl">
                   {hotel.name}
                 </h2>
                 <p className="text-sm text-teal-800">

@@ -28,8 +28,8 @@ export function Modal({ open, title, onClose, children, wide }: Props) {
       onClick={(e) => {
         if (e.target === ref.current) onClose() // backdrop click
       }}
-      className={`m-auto w-full ${wide ? 'max-w-3xl' : 'max-w-lg'} rounded-(--radius-tile)
-        border-t-2 border-t-gold-500 bg-white p-0 shadow-lg backdrop:bg-teal-950/50`}
+      className={`m-auto flex w-full max-h-[100dvh] flex-col ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'} ${wide ? 'sm:max-h-[90vh]' : 'sm:max-h-[85vh]'} rounded-(--radius-tile)
+        border-t-2 border-t-gold-500 bg-white p-0 shadow-lg backdrop:bg-teal-950/50 sm:m-auto`}
     >
       <div className="p-6" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">

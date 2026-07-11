@@ -40,7 +40,7 @@ export default function MyBookingsPage() {
         return (
           <article
             key={booking.id}
-            className="card-tile flex flex-col gap-4 p-5 sm:flex-row sm:items-center"
+            className="card-tile flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5"
           >
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-3">
@@ -68,7 +68,7 @@ export default function MyBookingsPage() {
                 )}
               </p>
             </div>
-            <div className="flex shrink-0 items-center gap-4">
+            <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end sm:gap-4">
               <p className="text-lg font-semibold text-teal-900">{money(booking.totalPrice)}</p>
               {cancellable && (
                 <button
